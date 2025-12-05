@@ -187,6 +187,101 @@ $title = 'Geolaundry';
     unset($_SESSION['flash_logout']); // Hapus pesan agar tidak muncul lagi saat refresh
   }
   ?>
+  <!-- modal detail -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+
+        <div class="modal-header text-white" style="background-color:#02C3FE;">
+          <h5 class="modal-title">Detail Laundry</h5>
+          <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Tabs Header -->
+          <ul class="nav nav-tabs mb-3" id="detailTab" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabInfo" type="button">Info Umum</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabLokasi" type="button">Lokasi & Kontak</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFoto" type="button">Foto</button>
+            </li>
+          </ul>
+
+          <!-- Tabs Content -->
+          <div class="tab-content">
+
+            <!-- INFO UMUM -->
+            <div class="tab-pane fade show active" id="tabInfo">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Nama Laundry</label>
+                  <input id="m_nama" type="text" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Kategori</label>
+                  <input id="m_kategori" type="text" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Alamat</label>
+                  <textarea id="m_alamat" class="form-control" rows="3" readonly></textarea>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Profil / Deskripsi</label>
+                  <textarea id="m_profile" class="form-control" rows="3" readonly></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- LOKASI & KONTAK -->
+            <div class="tab-pane fade" id="tabLokasi">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Latitude</label>
+                  <input id="m_lat" type="text" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Longitude</label>
+                  <input id="m_lng" type="text" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">No. Telepon</label>
+                  <input id="m_telp" type="text" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Jam Buka</label>
+                  <input id="m_jam" type="text" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+
+            <!-- FOTO -->
+            <div class="tab-pane fade" id="tabFoto">
+              <div class="foto-container d-flex justify-content-center">
+                <img id="m_foto" src="" class="rounded foto-laundry" width="200" alt="Foto Laundry">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
   <!-- ======= Header ======= -->
   <header id="header" class="header sticky-top">
     <!-- Branding & Nav -->
@@ -262,6 +357,7 @@ $title = 'Geolaundry';
         <a href="#"><i class="bi bi-instagram"></i></a>
         <a href="#"><i class="bi bi-twitter-x"></i></a>
       </div>
+
     </div>
   </footer>
   <!-- Scroll Top -->
@@ -336,13 +432,54 @@ $title = 'Geolaundry';
             <b><?= $nama ?></b><br><br>
             No Telpon: <?= $no_telp ?><br>
             Jam Buka: <?= $jam_buka ?><br>
-            Kategori: <?= $nama_kategori ?><br><br>
+            Kategori: <?= $nama_kategori ?><br> <br>
+            
+            <button 
+            class="btn btn-sm btn-info openModal"
+            data-nama="<?= $nama ?>"
+            data-kategori="<?= $nama_kategori ?>"
+            data-lat="<?= $lat ?>"
+            data-lng="<?= $lng ?>"
+            data-telp="<?= $no_telp ?>"
+            data-jam="<?= $jam_buka ?>"
+            data-alamat="<?= addslashes($row['alamat']) ?>"
+            data-profile="<?= addslashes($row['profile']) ?>"
+            data-foto="../laundry/<?= $foto ?>">
+            Detail Laundry
+            </button>
+
+
+            <br><br>
             <img src= "../laundry/<?= $foto ?>" width="120" alt="Foto laundry"><br>
+
           `);
     <?php
       }
     }
     ?>
+    // =====================================
+    // EVENT LISTENER UNTUK BUTTON MODAL
+    // =====================================
+    map.on("popupopen", function(e) {
+      const btn = e.popup._container.querySelector(".openModal");
+      if (btn) {
+        btn.addEventListener("click", function() {
+
+          document.getElementById("m_nama").value = this.dataset.nama;
+          document.getElementById("m_kategori").value = this.dataset.kategori;
+          document.getElementById("m_lat").value = this.dataset.lat;
+          document.getElementById("m_lng").value = this.dataset.lng;
+          document.getElementById("m_telp").value = this.dataset.telp;
+          document.getElementById("m_jam").value = this.dataset.jam;
+          document.getElementById("m_alamat").value = this.dataset.alamat;
+          document.getElementById("m_profile").value = this.dataset.profile;
+          document.getElementById("m_foto").src = this.dataset.foto;
+
+          let modal = new bootstrap.Modal(document.getElementById("detailModal"));
+          modal.show();
+        });
+      }
+    });
   </script>
 
   <!-- Vendor JS Files -->
