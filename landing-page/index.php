@@ -191,7 +191,6 @@ $title = 'Geolaundry';
   <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
-
         <div class="modal-header text-white" style="background-color:#02C3FE;">
           <h5 class="modal-title">Detail Laundry</h5>
           <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal"></button>
@@ -238,7 +237,6 @@ $title = 'Geolaundry';
                 </div>
               </div>
             </div>
-
             <!-- LOKASI & KONTAK -->
             <div class="tab-pane fade" id="tabLokasi">
               <div class="row g-3">
@@ -262,11 +260,9 @@ $title = 'Geolaundry';
             </div>
           </div>
         </div>
-
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
         </div>
-
       </div>
     </div>
   </div>
@@ -345,14 +341,12 @@ $title = 'Geolaundry';
         <a href="#"><i class="bi bi-instagram"></i></a>
         <a href="#"><i class="bi bi-twitter-x"></i></a>
       </div>
-
     </div>
   </footer>
   <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
     <i class="bi bi-arrow-up-short"></i>
   </a>
-
   <?php
   // Ambil data dari database
   $result = mysqli_query($koneksi, "SELECT 
@@ -375,23 +369,19 @@ $title = 'Geolaundry';
       zoom: 13,
       fullscreenControl: true
     });
-
     // Hilangkan tulisan "Leaflet"
     map.attributionControl.setPrefix(false);
-
     // Basemap OpenStreetMap
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
-
     // Basemap Satelit (Esri)
     var satellite = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics'
       }
     );
-
     // Kontrol untuk ganti basemap
     var baseMaps = {
       "OpenStreetMap": osm,
@@ -414,7 +404,6 @@ $title = 'Geolaundry';
       $nama_layanan = $row['nama_layanan'];
       $foto = $row["foto"];
       $foto_url = "../laundry/" . $foto;
-
       // Validasi agar hanya koordinat valid yang ditampilkan
       if (
         is_numeric($lat) && is_numeric($lng) &&
@@ -428,7 +417,6 @@ $title = 'Geolaundry';
             No Telpon: <?= $no_telp ?><br>
             Jam Buka: <?= $jam_buka ?><br>
             Layanan Khusus: <?= $nama_khusus ?><br><br>
-
             <img src= "../laundry/<?= $foto ?>" width="120" alt="Foto laundry"><br><br>
             <button 
             class="btn btn-sm btn-info openModal"
@@ -489,8 +477,6 @@ $title = 'Geolaundry';
   <script src="<?= $main_url ?>landing-page/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <!-- Main JS File -->
   <script src="<?= $main_url ?>landing-page/assets/js/main.js"></script>
-
-
 
 </body>
 
