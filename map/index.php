@@ -39,10 +39,10 @@ require '../templates/navbar.php';
 
 <?php
 // Ambil data dari database
-$result = mysqli_query($koneksi, "SELECT laundry.*, layanan_laundry.nama_kategori 
+$result = mysqli_query($koneksi, "SELECT laundry.*, layanan_khusus.nama_layanan_khusus 
                                                         FROM laundry 
-                                                        INNER JOIN layanan_laundry 
-                                                        ON laundry.id_kategori = layanan_laundry.id_kategori 
+                                                        INNER JOIN layanan_khusus
+                                                        ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus
                                                         ORDER BY laundry.id_laundry DESC");
 ?>
 
@@ -89,7 +89,7 @@ $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_laundry.nama_kategor
         $lng  = $row['longitude'];
         $noTelp = $row['no_telp'];
         $jamBuka = $row['jam_buka'];
-        $kategori = $row['nama_kategori'];
+        $kategori = $row['nama_layanan_khusus'];
         $foto = $row["foto"];
         $foto_url = "../laundry/" . $foto;
 
@@ -106,7 +106,7 @@ $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_laundry.nama_kategor
         
         No Telp : <?= $noTelp ?><br>
         Jam Buka : <?= $jamBuka ?><br>
-        Nama Kategori : <?= $kategori ?><br> <br>
+        Nama Layanan Khusus : <?= $kategori ?><br> <br>
         <img src= "../laundry/<?= $foto ?>" width="120" alt="Foto laundry"><br>
         
         

@@ -57,23 +57,35 @@ require '../templates/navbar.php';
                                                 $no = 1;
                                                 $queryLaundry = mysqli_query(
                                                     $koneksi,
-                                                    "SELECT laundry.*, layanan_laundry.nama_kategori 
-                                                        FROM laundry 
-                                                        INNER JOIN layanan_laundry 
-                                                        ON laundry.id_kategori = layanan_laundry.id_kategori 
-                                                        ORDER BY laundry.id_laundry DESC"
+                                                    "SELECT 
+                                                        laundry.*, 
+                                                        layanan_khusus.nama_layanan_khusus,
+                                                        layanan.nama_layanan,
+                                                        layanan.harga
+                                                    FROM laundry
+                                                    INNER JOIN layanan_khusus 
+                                                        ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus
+                                                    INNER JOIN layanan
+                                                        ON laundry.id_layanan = layanan.id_layanan
+                                                    ORDER BY laundry.id_laundry DESC;"
                                                 );
                                                 while ($laundry = mysqli_fetch_assoc($queryLaundry)) {
                                                     $id_laundry = $laundry['id_laundry'];
+                                                    $id_layanan = $laundry['id_layanan'];
+                                                    $id_layanan_khusus = $laundry['id_layanan_khusus'];
                                                 ?>
                                                     <tr class="align-middle">
                                                         <td><?= $no++ ?></td>
                                                         <td><?= htmlspecialchars($laundry['nama_laundry']) ?></td>
-                                                        <td><?= $laundry['nama_kategori'] ?></td>
+                                                        <td><?= $laundry['nama_layanan_khusus'] ?></td>
                                                         <td><?= $laundry['no_telp'] ?></td>
                                                         <td><?= $laundry['jam_buka'] ?></td>
                                                         <td>
                                                             <div class="d-inline-flex gap-1">
+                                                                <!-- tombol layanan -->
+                                                                <button type="button" title="Kelola Layanan" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#layananModal">
+                                                                    <i class="ti ti-settings-2" style="font-size: 1.1rem;"></i>
+                                                                </button>
                                                                 <!-- Tombol Detail -->
                                                                 <button type="button" title="Lihat Detail" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal<?= $id_laundry ?>">
                                                                     <i class="ti ti-eye" style="font-size: 1.1rem;"></i>
@@ -135,9 +147,25 @@ require '../templates/navbar.php';
                                                                             <textarea class="form-control" rows="2" readonly><?= htmlspecialchars($laundry['profile']) ?></textarea>
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <label class="form-label fw-semibold">Kategori</label>
-                                                                            <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['nama_kategori']) ?>" readonly>
+                                                                            <label class="form-label fw-semibold">Layanan Khusus</label>
+                                                                            <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['nama_layanan_khusus']) ?>" readonly>
                                                                         </div>
+                                                                        <?php
+                                                                        $raw = $laundry['harga'];                 // "15.000"
+                                                                        $clean = str_replace('.', '', $raw);      // "15000"
+                                                                        $hargaFormat = number_format($clean, 0, ',', '.'); // "15.000"
+                                                                        ?>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label fw-semibold ">Layanan</label>
+                                                                            <div class="p-2 border rounded bg-light">
+                                                                                <div class="d-flex justify-content-between ">
+                                                                                    <span><?= htmlspecialchars($laundry['nama_layanan']) ?></span>
+                                                                                    <span>Rp <?= $hargaFormat ?></span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+
                                                                         <div class="col-md-6 text-center">
                                                                             <label class="form-label fw-semibold d-block">Foto Laundry</label>
                                                                             <img src="<?= htmlspecialchars($laundry['foto']) ?>"
@@ -198,13 +226,25 @@ require '../templates/navbar.php';
                                                                                 <textarea name="profile" class="form-control" rows="2" required><?= htmlspecialchars($laundry['profile']) ?></textarea>
                                                                             </div>
                                                                             <div class="col-md-6">
-                                                                                <label class="form-label">Kategori</label>
-                                                                                <select name="id_kategori" class="form-control" required>
+                                                                                <label class="form-label">Layanan Khusus</label>
+                                                                                <select name="id_layanan_khusus" class="form-control" required>
                                                                                     <?php
-                                                                                    $queryKategori = mysqli_query($koneksi, "SELECT * FROM layanan_laundry");
-                                                                                    while ($kategori = mysqli_fetch_assoc($queryKategori)) {
-                                                                                        $selected = ($kategori['id_kategori'] == $laundry['id_kategori']) ? 'selected' : '';
-                                                                                        echo "<option value='{$kategori['id_kategori']}' $selected>{$kategori['nama_kategori']}</option>";
+                                                                                    $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
+                                                                                    while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
+                                                                                        $selected = ($layanan['id_layanan_khusus'] == $laundry['id_layanan_khusus']) ? 'selected' : '';
+                                                                                        echo "<option value='{$layanan['id_layanan_khusus']}' $selected>{$layanan['nama_layanan_khusus']}</option>";
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <label class="form-label">Layanan</label>
+                                                                                <select name="id_layanan" class="form-control" required>
+                                                                                    <?php
+                                                                                    $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan");
+                                                                                    while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
+                                                                                        $selected = ($layanan['id_layanan'] == $laundry['id_layanan']) ? 'selected' : '';
+                                                                                        echo "<option value='{$layanan['id_layanan']}' $selected>{$layanan['nama_layanan']}</option>";
                                                                                     }
                                                                                     ?>
                                                                                 </select>
@@ -228,10 +268,172 @@ require '../templates/navbar.php';
                                                 <?php } ?>
                                             </tbody>
                                         </table>
+                                        <!-- Modal Layanan -->
+                                        <?php
+                                        // Ambil data layanan sekali saja
+                                        $layananData = [];
+                                        $queryL = mysqli_query($koneksi, "SELECT * FROM layanan ORDER BY id_layanan DESC");
+                                        while ($row = mysqli_fetch_assoc($queryL)) {
+                                            $layananData[] = $row;
+                                        }
+                                        ?>
+
+                                        <div class="modal fade" id="layananModal" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow">
+
+                                                    <div class="modal-header bg-secondary text-white">
+                                                        <h5 class="modal-title">Manajemen Layanan</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+
+                                                    <div class="modal-body">
+
+                                                        <!-- Tabs -->
+                                                        <ul class="nav nav-tabs mb-3" id="layananTab" role="tablist">
+                                                            <li class="nav-item" role="presentation">
+                                                                <button class="nav-link active"
+                                                                    id="list-tab"
+                                                                    data-bs-toggle="tab"
+                                                                    data-bs-target="#listLayanan"
+                                                                    type="button" role="tab">
+                                                                    Daftar Layanan
+                                                                </button>
+                                                            </li>
+
+                                                            <li class="nav-item" role="presentation">
+                                                                <button class="nav-link"
+                                                                    id="tambah-tab"
+                                                                    data-bs-toggle="tab"
+                                                                    data-bs-target="#tambahLayanan"
+                                                                    type="button" role="tab">
+                                                                    Tambah Layanan
+                                                                </button>
+                                                            </li>
+                                                        </ul>
+
+                                                        <div class="tab-content">
+
+                                                            <!-- TAB 1: LIST LAYANAN -->
+                                                            <div class="tab-pane fade show active" id="listLayanan" role="tabpanel">
+                                                                <div class="table-responsive">
+                                                                    <table class="datatable table table-bordered text-center align-middle">
+                                                                        <thead class="table-success">
+                                                                            <tr>
+                                                                                <th>No</th>
+                                                                                <th>Nama Layanan</th>
+                                                                                <th>Harga / Kg</th>
+                                                                                <th>Aksi</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <?php $no = 1;
+                                                                            foreach ($layananData as $layanan) : ?>
+                                                                                <tr>
+                                                                                    <td><?= $no++ ?></td>
+                                                                                    <td><?= htmlspecialchars($layanan['nama_layanan']) ?></td>
+                                                                                    <td><?= number_format($layanan['harga'], 0, ',', '.') ?></td>
+                                                                                    <td>
+                                                                                        <div class="d-inline-flex gap-1">
+
+                                                                                            <!-- Tombol Edit -->
+                                                                                            <button class="btn btn-sm btn-warning"
+                                                                                                data-bs-toggle="modal"
+                                                                                                data-bs-target="#editLayananModal<?= $layanan['id_layanan'] ?>">
+                                                                                                <i class="ti ti-edit"></i>
+                                                                                            </button>
+
+                                                                                            <!-- Tombol Hapus -->
+                                                                                            <a href="proses-layanan.php?hapus=<?= $layanan['id_layanan'] ?>"
+                                                                                                class="btn btn-sm btn-danger btn-hapus">
+                                                                                                <i class="ti ti-trash"></i>
+                                                                                            </a>
+
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            <?php endforeach; ?>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- TAB 2: TAMBAH LAYANAN -->
+                                                            <div class="tab-pane fade" id="tambahLayanan" role="tabpanel">
+                                                                <form action="proses-layanan.php" method="POST">
+                                                                    <div class="mb-3">
+                                                                        <label>Nama Layanan</label>
+                                                                        <input type="text" name="nama_layanan" class="form-control" required>
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label>Harga / Kg</label>
+                                                                        <input type="number" name="harga" class="form-control" min="100" required>
+                                                                    </div>
+
+                                                                    <button type="submit" name="tambah" class="btn btn-secondary mt-2">
+                                                                        Tambah
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <!-- Modal Edit Layanan -->
+                                                        <?php foreach ($layananData as $layanan) : ?>
+                                                            <div class="modal fade" id="editLayananModal<?= $layanan['id_layanan'] ?>" tabindex="-1">
+                                                                <div class="modal-dialog modal-dialog-centered">
+                                                                    <div class="modal-content border-0 shadow">
+
+                                                                        <div class="modal-header bg-warning">
+                                                                            <h5 class="modal-title">Edit Layanan</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                        </div>
+
+                                                                        <form action="proses-layanan.php" method="POST">
+                                                                            <div class="modal-body">
+
+                                                                                <input type="hidden" name="id_layanan" value="<?= $layanan['id_layanan'] ?>">
+
+                                                                                <div class="mb-3">
+                                                                                    <label>Nama Layanan</label>
+                                                                                    <input type="text" name="nama_layanan" class="form-control"
+                                                                                        value="<?= htmlspecialchars($layanan['nama_layanan']) ?>" required>
+                                                                                </div>
+
+                                                                                <div class="mb-3">
+                                                                                    <label>Harga / Kg</label>
+                                                                                    <input type="number" name="harga" class="form-control"
+                                                                                        value="<?= $layanan['harga'] ?>" required>
+                                                                                </div>
+
+                                                                            </div>
+
+                                                                            <div class="modal-footer">
+                                                                                <button type="submit" name="update" class="btn btn-warning">Update</button>
+                                                                            </div>
+                                                                        </form>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <!-- Tambah Laundry -->
                         <div class="tab-pane fade" id="tambahLaundry" role="tabpanel" aria-labelledby="tambah-tab">
                             <div class="card shadow-sm border-0 rounded-3">
@@ -272,13 +474,25 @@ require '../templates/navbar.php';
                                                 <textarea name="profile" class="form-control" rows="2" required></textarea>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Kategori</label>
-                                                <select name="id_kategori" class="form-control" required>
-                                                    <option value="">-- Pilih Kategori --</option>
+                                                <label class="form-label">Layanan Khusus</label>
+                                                <select name="id_layanan_khusus" class="form-control" required>
+                                                    <option value="">-- Pilih Layanan Khusus --</option>
                                                     <?php
-                                                    $queryKategori = mysqli_query($koneksi, "SELECT * FROM layanan_laundry");
-                                                    while ($kategori = mysqli_fetch_assoc($queryKategori)) {
-                                                        echo "<option value='{$kategori['id_kategori']}'>{$kategori['nama_kategori']}</option>";
+                                                    $queryLayananKhusus = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
+                                                    while ($layanan = mysqli_fetch_assoc($queryLayananKhusus)) {
+                                                        echo "<option value='{$layanan['id_layanan_khusus']}'>{$layanan['nama_layanan_khusus']}</option>";
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Layanan</label>
+                                                <select name="id_layanan" class="form-control" required>
+                                                    <option value="">-- Pilih Layanan --</option>
+                                                    <?php
+                                                    $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan");
+                                                    while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
+                                                        echo "<option value='{$layanan['id_layanan']}'>{$layanan['nama_layanan']}</option>";
                                                     }
                                                     ?>
                                                 </select>

@@ -196,9 +196,7 @@ $title = 'Geolaundry';
           <h5 class="modal-title">Detail Laundry</h5>
           <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal"></button>
         </div>
-
         <div class="modal-body">
-
           <!-- Tabs Header -->
           <ul class="nav nav-tabs mb-3" id="detailTab" role="tablist">
             <li class="nav-item">
@@ -207,32 +205,33 @@ $title = 'Geolaundry';
             <li class="nav-item">
               <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabLokasi" type="button">Lokasi & Kontak</button>
             </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFoto" type="button">Foto</button>
-            </li>
           </ul>
-
           <!-- Tabs Content -->
           <div class="tab-content">
-
             <!-- INFO UMUM -->
             <div class="tab-pane fade show active" id="tabInfo">
               <div class="row g-3">
+                <div class="col-md-12 ">
+                  <div class="foto-container d-flex justify-content-left">
+                    <img id="m_foto" src="" class="rounded foto-laundry" width="150" alt="Foto Laundry">
+                  </div>
+                </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Nama Laundry</label>
                   <input id="m_nama" type="text" class="form-control" readonly>
                 </div>
-
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Kategori</label>
-                  <input id="m_kategori" type="text" class="form-control" readonly>
+                  <label class="form-label fw-semibold">Layanan Khusus</label>
+                  <input id="m_khusus" type="text" class="form-control" readonly>
                 </div>
-
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Layanan</label>
+                  <input id="m_layanan" type="text" class="form-control" readonly>
+                </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Alamat</label>
                   <textarea id="m_alamat" class="form-control" rows="3" readonly></textarea>
                 </div>
-
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Profil / Deskripsi</label>
                   <textarea id="m_profile" class="form-control" rows="3" readonly></textarea>
@@ -247,31 +246,20 @@ $title = 'Geolaundry';
                   <label class="form-label fw-semibold">Latitude</label>
                   <input id="m_lat" type="text" class="form-control" readonly>
                 </div>
-
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Longitude</label>
                   <input id="m_lng" type="text" class="form-control" readonly>
                 </div>
-
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">No. Telepon</label>
                   <input id="m_telp" type="text" class="form-control" readonly>
                 </div>
-
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Jam Buka</label>
                   <input id="m_jam" type="text" class="form-control" readonly>
                 </div>
               </div>
             </div>
-
-            <!-- FOTO -->
-            <div class="tab-pane fade" id="tabFoto">
-              <div class="foto-container d-flex justify-content-center">
-                <img id="m_foto" src="" class="rounded foto-laundry" width="200" alt="Foto Laundry">
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -367,10 +355,10 @@ $title = 'Geolaundry';
 
   <?php
   // Ambil data dari database
-  $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_laundry.nama_kategori 
+  $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_khusus.nama_layanan_khusus
                                                         FROM laundry 
-                                                        INNER JOIN layanan_laundry 
-                                                        ON laundry.id_kategori = layanan_laundry.id_kategori 
+                                                        INNER JOIN layanan_khusus 
+                                                        ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus 
                                                         ORDER BY laundry.id_laundry DESC");
   ?>
   <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
@@ -416,7 +404,7 @@ $title = 'Geolaundry';
       $lng  = $row['longitude'];
       $no_telp  = $row['no_telp'];
       $jam_buka  = $row['jam_buka'];
-      $nama_kategori  = $row['nama_kategori'];
+      $nama_khusus  = $row['nama_layanan_khusus'];
       $foto = $row["foto"];
       $foto_url = "../laundry/" . $foto;
 
@@ -432,12 +420,13 @@ $title = 'Geolaundry';
             <b><?= $nama ?></b><br><br>
             No Telpon: <?= $no_telp ?><br>
             Jam Buka: <?= $jam_buka ?><br>
-            Kategori: <?= $nama_kategori ?><br> <br>
-            
+            Layanan Khusus: <?= $nama_khusus ?><br><br>
+
+            <img src= "../laundry/<?= $foto ?>" width="120" alt="Foto laundry"><br><br>
             <button 
             class="btn btn-sm btn-info openModal"
             data-nama="<?= $nama ?>"
-            data-kategori="<?= $nama_kategori ?>"
+            data-kategori="<?= $nama_khusus ?>"
             data-lat="<?= $lat ?>"
             data-lng="<?= $lng ?>"
             data-telp="<?= $no_telp ?>"
@@ -447,12 +436,8 @@ $title = 'Geolaundry';
             data-foto="../laundry/<?= $foto ?>">
             Detail Laundry
             </button>
-
-
-            <br><br>
-            <img src= "../laundry/<?= $foto ?>" width="120" alt="Foto laundry"><br>
-
-          `);
+  
+            `);
     <?php
       }
     }
@@ -466,7 +451,7 @@ $title = 'Geolaundry';
         btn.addEventListener("click", function() {
 
           document.getElementById("m_nama").value = this.dataset.nama;
-          document.getElementById("m_kategori").value = this.dataset.kategori;
+          document.getElementById("m_khusus").value = this.dataset.kategori;
           document.getElementById("m_lat").value = this.dataset.lat;
           document.getElementById("m_lng").value = this.dataset.lng;
           document.getElementById("m_telp").value = this.dataset.telp;

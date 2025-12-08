@@ -19,13 +19,13 @@ require '../templates/navbar.php';
             <!-- Filter Form -->
             <form action="rekap.php" method="GET" target="_blank" class="row g-3 align-items-end mb-4">
                 <div class="col-md-4">
-                    <label for="kategori" class="form-label">Kategori Laundry</label>
-                    <select name="kategori" id="kategori" class="form-select">
-                        <option value="">Semua Kategori</option>
+                    <label for="khusus" class="form-label">Layanan Khusus</label>
+                    <select name="khusus" id="khusus" class="form-select">
+                        <option value="">Semua Layanan Khusus</option>
                         <?php
-                        $queryKategori = mysqli_query($koneksi, "SELECT * FROM layanan_laundry ORDER BY nama_kategori ASC");
-                        while ($row = mysqli_fetch_assoc($queryKategori)) {
-                            echo "<option value='{$row['id_kategori']}'>{$row['nama_kategori']}</option>";
+                        $queryKhusus = mysqli_query($koneksi, "SELECT * FROM layanan_khusus ORDER BY nama_layanan_khusus ASC");
+                        while ($row = mysqli_fetch_assoc($queryKhusus)) {
+                            echo "<option value='{$row['id_layanan_khusus']}'>{$row['nama_layanan_khusus']}</option>";
                         }
                         ?>
                     </select>
@@ -59,7 +59,7 @@ require '../templates/navbar.php';
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Laundry</th>
-                                    <th>Kategori</th>
+                                    <th>Layanan Khusus</th>
                                     <th>No. Telpon</th>
                                     <th>Jam Buka</th>
                                     <th>Kecamatan</th>
@@ -69,9 +69,9 @@ require '../templates/navbar.php';
                                 <?php
                                 $no = 1;
                                 $queryLaundry = mysqli_query($koneksi, "
-                                    SELECT l.*, k.nama_kategori 
+                                    SELECT l.*, k.nama_layanan_khusus 
                                     FROM laundry l
-                                    INNER JOIN layanan_laundry k ON l.id_kategori = k.id_kategori
+                                    INNER JOIN layanan_khusus k ON l.id_layanan_khusus = k.id_layanan_khusus
                                     ORDER BY l.id_laundry DESC
                                 ");
                                 while ($laundry = mysqli_fetch_assoc($queryLaundry)) {
@@ -79,7 +79,7 @@ require '../templates/navbar.php';
                                     <tr>
                                         <td><?= $no++ ?></td>
                                         <td><?= htmlspecialchars($laundry['nama_laundry']) ?></td>
-                                        <td><?= htmlspecialchars($laundry['nama_kategori']) ?></td>
+                                        <td><?= htmlspecialchars($laundry['nama_layanan_khusus']) ?></td>
                                         <td><?= htmlspecialchars($laundry['no_telp']) ?></td>
                                         <td><?= htmlspecialchars($laundry['jam_buka']) ?></td>
                                         <td><?= htmlspecialchars($laundry['nama_kecamatan']) ?></td>

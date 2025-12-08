@@ -14,19 +14,19 @@ if (!isset($_SESSION['ssLoginLaundry'])) {
 }
 
 // Ambil filter dari GET
-$id_kategori = isset($_GET['kategori']) ? $_GET['kategori'] : '';
+$id_khusus = isset($_GET['khusus']) ? $_GET['khusus'] : '';
 $kecamatan = isset($_GET['kecamatan']) ? $_GET['kecamatan'] : '';
 
 // Buat query dinamis
 $query = "
-    SELECT l.*, k.nama_kategori 
+    SELECT l.*, k.nama_layanan_khusus
     FROM laundry l
-    INNER JOIN layanan_laundry k ON l.id_kategori = k.id_kategori
+    INNER JOIN layanan_khusus k ON l.id_layanan_khusus = k.id_layanan_khusus
     WHERE 1=1
 ";
 
-if (!empty($id_kategori)) {
-    $query .= " AND l.id_kategori = '" . mysqli_real_escape_string($koneksi, $id_kategori) . "'";
+if (!empty($id_khusus)) {
+    $query .= " AND l.id_layanan_khusus = '" . mysqli_real_escape_string($koneksi, $id_khusus) . "'";
 }
 if (!empty($kecamatan)) {
     $query .= " AND l.nama_kecamatan = '" . mysqli_real_escape_string($koneksi, $kecamatan) . "'";
@@ -36,10 +36,10 @@ $query .= " ORDER BY l.nama_laundry ASC";
 $result = mysqli_query($koneksi, $query);
 
 // Ambil nama kategori kalau difilter
-$namaKat = '-';
-if ($id_kategori) {
-    $dataKat = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT nama_kategori FROM layanan_laundry WHERE id_kategori='$id_kategori'"));
-    $namaKat = $dataKat['nama_kategori'] ?? '-';
+$namaKhusus = '-';
+if ($id_khusus) {
+    $dataKhusus = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT nama_layanan_khusus FROM layanan_khusus WHERE id_layanan_khusus='$id_khusus'"));
+    $namaKhusus = $dataKhusus['nama_layanan_khusus'] ?? '-';
 }
 
 // Buat HTML untuk PDF
@@ -111,9 +111,9 @@ ob_start();
     <div class="header">
         <h2>Rekap Data Laundry</h2>
         <p class="filter">
-            <?= ($id_kategori ? "Kategori: <b>$namaKat</b> | " : '') ?>
-            <?= ($kecamatan ? "Kecamatan: <b>$kecamatan</b>" : '') ?>
-            <?= (!$id_kategori && !$kecamatan ? "Semua Data Laundry" : '') ?>
+            <?= ($id_khusus ? "Layanan Khusus: <b>$namaKhusus</b> | " : '') ?>
+            <?= ($kecamatan ? "Kecamatan     : <b>$kecamatan</b>" : '') ?>
+            <?= (!$id_khusus && !$kecamatan ? "Semua Data Laundry" : '') ?>
         </p>
     </div>
     <table>
@@ -121,7 +121,7 @@ ob_start();
             <tr>
                 <th>No</th>
                 <th>Nama Laundry</th>
-                <th>Kategori</th>
+                <th>Layanan Khusus</th>
                 <th>No. Telp</th>
                 <th>Jam Buka</th>
                 <th>Kecamatan</th>
@@ -135,7 +135,7 @@ ob_start();
                     echo "<tr>
                             <td>{$no}</td>
                             <td>{$row['nama_laundry']}</td>
-                            <td>{$row['nama_kategori']}</td>
+                            <td>{$row['nama_layanan_khusus']}</td>
                             <td>{$row['no_telp']}</td>
                             <td>{$row['jam_buka']}</td>
                             <td>{$row['nama_kecamatan']}</td>

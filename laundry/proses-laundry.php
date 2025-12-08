@@ -12,7 +12,8 @@ if (isset($_POST['simpan'])) {
     $jam_buka    = trim($_POST['jamBuka']);
     $alamat      = trim($_POST['alamatLaundry']);
     $profile     = trim($_POST['profile']);
-    $id_kategori = intval($_POST['id_kategori']);
+    $id_layananKhusus = intval($_POST['id_layanan_khusus']);
+    $id_layanan = intval($_POST['id_layanan']);
     $id_user     = 1;
 
     //Validasi koordinat
@@ -54,13 +55,13 @@ if (isset($_POST['simpan'])) {
     $stmt = mysqli_prepare(
         $koneksi,
         "INSERT INTO laundry 
-        (nama_laundry, nama_kecamatan, longitude, latitude, no_telp, jam_buka, alamat, profile, id_kategori, id_user, foto)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        (nama_laundry, nama_kecamatan, longitude, latitude, no_telp, jam_buka, alamat, profile, id_layanan_khusus, id_user, id_layanan, foto)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     if ($stmt) {
         mysqli_stmt_bind_param(
             $stmt,
-            "ssddssssiis",
+            "ssddssssiiis",
             $nama,
             $kecamatan,
             $longitude,
@@ -69,8 +70,9 @@ if (isset($_POST['simpan'])) {
             $jam_buka,
             $alamat,
             $profile,
-            $id_kategori,
+            $id_layananKhusus,
             $id_user,
+            $id_layanan,
             $fotoPath
         );
         if (mysqli_stmt_execute($stmt)) {
@@ -98,7 +100,8 @@ if (isset($_POST['update'])) {
     $jam_buka    = trim($_POST['jamBuka']);
     $alamat      = trim($_POST['alamatLaundry']);
     $profile     = trim($_POST['profile']);
-    $id_kategori = intval($_POST['id_kategori']);
+    $id_layananKhusus = intval($_POST['id_layanan_khusus']);
+    $id_layanan = intval($_POST['id_layanan']);
     $id_user     = 1;
     $fotoLama    = trim($_POST['fotoLama']);
 
@@ -139,14 +142,14 @@ if (isset($_POST['update'])) {
         "UPDATE laundry 
         SET nama_laundry=?, nama_kecamatan=?, longitude=?, latitude=?, 
             no_telp=?, jam_buka=?, alamat=?, profile=?, 
-            id_kategori=?, id_user=?, foto=?
+            id_layanan_khusus=?, id_user=?, id_layanan=?, foto=?
         WHERE id_laundry=?"
     );
 
     if ($stmt) {
         mysqli_stmt_bind_param(
             $stmt,
-            "ssddssssiisi",
+            "ssddssssiissi",
             $nama,
             $kecamatan,
             $longitude,
@@ -155,8 +158,9 @@ if (isset($_POST['update'])) {
             $jam_buka,
             $alamat,
             $profile,
-            $id_kategori,
+            $id_layananKhusus,
             $id_user,
+            $id_layanan,
             $fotoPath,
             $id_laundry
         );

@@ -92,7 +92,7 @@ require 'templates/navbar.php';
                                 <div class="card-body p-3">
                                     <h6 class="card-title mb-1"><i class="ti ti-category" style="font-size: 1.2rem; margin-right: 6px;"></i> Total Kategori</h6>
                                     <h4 class="fw-bold mb-0"><?php
-                                                                $query1 = "SELECT COUNT(*) AS total_kategori FROM layanan_laundry;";
+                                                                $query1 = "SELECT COUNT(*) AS total_kategori FROM layanan_khusus;";
                                                                 $resultKategori = mysqli_query($koneksi, $query1);
                                                                 $dataKateogri = mysqli_fetch_assoc($resultKategori);
                                                                 echo $dataKateogri['total_kategori'];

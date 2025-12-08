@@ -8,7 +8,7 @@ if (!isset($_SESSION['ssLoginLaundry'])) {
     exit();
 }
 require '../config.php';
-$title = 'Layanan Khusus - Geolaundry';
+$title = 'Layanan - Geolaundry';
 
 require '../templates/header.php';
 require '../templates/sidebar.php';
@@ -18,53 +18,53 @@ require '../templates/navbar.php';
 <div class="container-fluid">
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-4">Manajemen Layanan Khusus</h5>
+            <h5 class="card-title fw-semibold mb-4">Manajemen Layanan Laundry</h5>
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body">
                     <!-- Tabs -->
-                    <ul class="nav nav-tabs" id="layananTabs" role="tablist">
+                    <ul class="nav nav-tabs" id="kategoriTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="data-layanan-tab" data-bs-toggle="tab" data-bs-target="#dataLayanan"
-                                type="button" role="tab" aria-controls="dataLayanan" aria-selected="true">
-                                Data Layanan Khusus
+                            <button class="nav-link active" id="data-kategori-tab" data-bs-toggle="tab" data-bs-target="#dataKategori"
+                                type="button" role="tab" aria-controls="dataKategori" aria-selected="true">
+                                Data Layanan
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="tambah-layanan-tab" data-bs-toggle="tab" data-bs-target="#tambahLayanan"
                                 type="button" role="tab" aria-controls="tambahLayanan" aria-selected="false">
-                                Tambah Layanan Khusus
+                                Tambah Layanan
                             </button>
                         </li>
                     </ul>
                     <!-- Tab Content -->
-                    <div class="tab-content mt-3" id="layananTabsContent">
-                        <!-- Data Layanan -->
-                        <div class="tab-pane fade show active" id="dataLayanan" role="tabpanel" aria-labelledby="data-layanan-tab">
+                    <div class="tab-content mt-3" id="kategoriTabsContent">
+                        <!-- Data Kategori -->
+                        <div class="tab-pane fade show active" id="dataKategori" role="tabpanel" aria-labelledby="data-kategori-tab">
                             <div class="card shadow-sm border-0 rounded-3">
                                 <div class="card-body">
-                                    <h6 class="card-title fw-semibold mb-3">Daftar Layanan Khusus</h6>
+                                    <h6 class="card-title fw-semibold mb-3">Daftar Layanan Laundry</h6>
                                     <table class="datatable table table-hover align-middle table-responsive">
                                         <thead class="table-success text-center">
                                             <tr>
                                                 <th>No</th>
-                                                <th>Nama Layanan Khusus</th>
-                                                <th>Deskripsi</th>
+                                                <th>Nama Layanan</th>
+                                                <th>Harga / Kg</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody class="text-center">
                                             <?php
                                             $no = 1;
-                                            $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
+                                            $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan");
                                             while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
-                                                $id_layanan = $layanan['id_layanan_khusus'];
-                                                $nama_layanan = $layanan['nama_layanan_khusus'];
-                                                $deskripsi = $layanan['deskripsi'];
+                                                $id_layanan = $layanan['id_layanan'];
+                                                $nama_layanan = $layanan['nama_layanan'];
+                                                $harga = $layanan['harga'];
                                             ?>
                                                 <tr>
                                                     <td><?= $no++ ?></td>
                                                     <td><?= htmlspecialchars($nama_layanan) ?></td>
-                                                    <td><?= htmlspecialchars($deskripsi) ?></td>
+                                                    <td><?= htmlspecialchars($harga) ?></td>
                                                     <td>
                                                         <!-- Tombol Edit -->
                                                         <button type="button" class="btn btn-sm btn-warning" title="Edit Kategori" data-bs-toggle="modal" data-bs-target="#editModal<?= $id_layanan ?>">
@@ -85,7 +85,7 @@ require '../templates/navbar.php';
                                                     <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content border-0 rounded-3 shadow">
                                                             <div class="modal-header bg-opacity-75" style="background-color:#02C3FE;">
-                                                                <h5 class="modal-title fw-semibold" id="editModalLabel<?= $id_layanan ?>">Edit Layanan Khusus</h5>
+                                                                <h5 class="modal-title fw-semibold" id="editModalLabel<?= $id_layanan ?>">Edit Kategori</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <form action="proses-layanan.php" method="post" autocomplete="off">
@@ -98,9 +98,9 @@ require '../templates/navbar.php';
                                                                             name="layanan" value="<?= htmlspecialchars($nama_layanan) ?>" required>
                                                                     </div>
                                                                     <div class="mb-3">
-                                                                        <label for="deskripsi<?= $id_layanan ?>" class="form-label fw-semibold">Deskripsi</label>
-                                                                        <textarea class="form-control" required id="deskripsi<?= $id_layanan ?>" name="deskripsi"
-                                                                            rows="3"><?= htmlspecialchars($deskripsi) ?></textarea>
+                                                                        <label for="harga<?= $id_layanan ?>" class="form-label fw-semibold">Harga</label>
+                                                                        <textarea class="form-control" required id="harga<?= $id_layanan ?>" name="harga"
+                                                                            rows="3"><?= htmlspecialchars($harga) ?></textarea>
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">
@@ -121,15 +121,15 @@ require '../templates/navbar.php';
                         <div class="tab-pane fade" id="tambahLayanan" role="tabpanel" aria-labelledby="tambah-layanan-tab">
                             <div class="card shadow-sm border-0 rounded-3">
                                 <div class="card-body">
-                                    <h6 class="card-title fw-semibold mb-3">Tambah Layanan Khusus</h6>
+                                    <h6 class="card-title fw-semibold mb-3">Tambah Layanan Laundry</h6>
                                     <form action="proses-layanan.php" method="post" autocomplete="off">
                                         <div class="mb-3">
-                                            <label for="layanan" class="form-label">Nama Layanan Khusus</label>
+                                            <label for="layanan" class="form-label">Nama Layanan</label>
                                             <input type="text" class="form-control" id="layanan" name="layanan" required>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="deskripsi" class="form-label">Deskripsi</label>
-                                            <textarea class="form-control" id="deskripsi" name="deskripsi" required></textarea>
+                                            <label for="harga" class="form-label">Harga</label>
+                                            <textarea class="form-control" id="harga" name="harga" required></textarea>
                                         </div>
                                         <button type="submit" name="simpan" class="btn btn-outline-primary">Simpan</button>
                                     </form>
@@ -155,7 +155,7 @@ require '../templates/navbar.php';
                 const href = this.getAttribute('href');
 
                 Swal.fire({
-                    title: 'Yakin ingin menghapus layanan khusus ini?',
+                    title: 'Yakin ingin menghapus layanan ini?',
                     text: 'Data yang dihapus tidak dapat dikembalikan!',
                     icon: 'warning',
                     showCancelButton: true,
@@ -180,14 +180,14 @@ if (isset($_GET['msg'])) {
 
     // Daftar semua pesan untuk kategori
     $alerts = [
-        'add_success'    => ['success', 'Berhasil!', 'Layanan khusus berhasil ditambahkan!', true],
+        'add_success'    => ['success', 'Berhasil!', 'Layanan laundry berhasil ditambahkan!', true],
         'add_error'      => ['error', 'Gagal!', 'Terjadi kesalahan saat menyimpan data!'],
-        'update_success' => ['success', 'Berhasil!', 'Layanan khusus berhasil diupdate!', true],
+        'update_success' => ['success', 'Berhasil!', 'Layanan laundry berhasil diupdate!', true],
         'update_error'   => ['error', 'Gagal!', 'Terjadi kesalahan saat mengupdate data!'],
-        'delete_success' => ['success', 'Berhasil!', 'Layanan khusus berhasil dihapus!', true],
+        'delete_success' => ['success', 'Berhasil!', 'Layanan laundry berhasil dihapus!', true],
         'delete_error'   => ['error', 'Gagal!', 'Terjadi kesalahan saat menghapus data!'],
         'query_fail'     => ['warning', 'Kesalahan Sistem!', 'Query SQL gagal dijalankan!'],
-        'delete_error_fk' => ['warning', 'Gagal Hapus!', 'Layanan Khusus ini masih memiliki data laundry terkait. Hapus atau pindahkan data terlebih dahulu!']
+        'delete_error_fk' => ['warning', 'Gagal Hapus!', 'Layanan ini masih memiliki data laundry terkait. Hapus atau pindahkan data terlebih dahulu!']
     ];
 
     // Jika kode msg ada di daftar

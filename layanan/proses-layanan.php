@@ -6,14 +6,14 @@ require '../config.php';
 // Tambah data
 if (isset($_POST['simpan'])) {
     $namaLayanan = trim(htmlspecialchars($_POST['layanan']));
-    $deskripsi = trim(htmlspecialchars($_POST['deskripsi']));
+    $harga = trim(htmlspecialchars($_POST['harga']));
 
-    $query = mysqli_prepare($koneksi, "INSERT INTO layanan_khusus (nama_layanan_khusus, deskripsi) VALUES (?, ?)");
+    $query = mysqli_prepare($koneksi, "INSERT INTO layanan (nama_layanan, harga) VALUES (?, ?)");
     if (!$query) {
         header("Location:index.php?msg=query_fail");
         exit;
     }
-    mysqli_stmt_bind_param($query, "ss", $namaLayanan, $deskripsi);
+    mysqli_stmt_bind_param($query, "ss", $namaLayanan, $harga);
     if (mysqli_stmt_execute($query)) {
         mysqli_stmt_close($query);
         header("Location:index.php?msg=add_success");
@@ -28,14 +28,14 @@ if (isset($_POST['simpan'])) {
 if (isset($_POST['update'])) {
     $idLayanan = intval($_POST['id_layanan']);
     $namaLayanan = trim(htmlspecialchars($_POST['layanan']));
-    $deskripsi = trim(htmlspecialchars($_POST['deskripsi']));
+    $harga = trim(htmlspecialchars($_POST['harga']));
 
-    $query = mysqli_prepare($koneksi, "UPDATE layanan_khusus SET nama_layanan_khusus = ?, deskripsi = ? WHERE id_layanan_khusus = ?");
+    $query = mysqli_prepare($koneksi, "UPDATE layanan SET nama_layanan = ?, harga = ? WHERE id_layanan = ?");
     if (!$query) {
         header("Location:index.php?msg=query_fail");
         exit;
     }
-    mysqli_stmt_bind_param($query, "ssi", $namaLayanan, $deskripsi, $idLayanan);
+    mysqli_stmt_bind_param($query, "ssi", $namaLayanan, $harga, $idLayanan);
     if (mysqli_stmt_execute($query)) {
         mysqli_stmt_close($query);
         header("Location:index.php?msg=update_success");
@@ -52,7 +52,7 @@ if (isset($_GET['id'])) {
     $idLayanan = intval($_GET['id']);
 
     // Cek apakah kategori ini masih digunakan di tabel laundry
-    $cek = mysqli_prepare($koneksi, "SELECT COUNT(*) FROM laundry WHERE id_layanan_khusus = ?");
+    $cek = mysqli_prepare($koneksi, "SELECT COUNT(*) FROM laundry WHERE id_layanan = ?");
     if (!$cek) {
         header("Location:index.php?msg=query_fail");
         exit;
@@ -70,7 +70,7 @@ if (isset($_GET['id'])) {
     }
 
     // Jika tidak ada data terkait, lakukan delete
-    $query = mysqli_prepare($koneksi, "DELETE FROM layanan_khusus WHERE id_layanan_khusus = ?");
+    $query = mysqli_prepare($koneksi, "DELETE FROM layanan WHERE id_layanan = ?");
     if (!$query) {
         header("Location:index.php?msg=query_fail");
         exit;

@@ -51,9 +51,19 @@ $current_folder = basename(dirname($_SERVER['PHP_SELF']));
                     <a class="sidebar-link" href="<?= $main_url ?>layanan-khusus/index.php" aria-expanded="false">
                         <span>
                             <!-- Icon Kategori -->
-                            <i class="ti ti-category" style="font-size: 1.5rem;"></i>
+                            <i class="ti ti-wash-gentle" style="font-size: 1.5rem;"></i>
                         </span>
                         <span class="hide-menu">Layanan Khusus</span>
+                    </a>
+                </li>
+                <!-- layanan -->
+                <li class="sidebar-item <?= ($current_folder == 'layanan') ? 'active' : '' ?>">
+                    <a class="sidebar-link" href="<?= $main_url ?>layanan/index.php" aria-expanded="false">
+                        <span>
+                            <!-- Icon Kategori -->
+                            <i class="ti ti-category" style="font-size: 1.5rem;"></i>
+                        </span>
+                        <span class="hide-menu">Layanan</span>
                     </a>
                 </li>
                 <!-- Map -->
