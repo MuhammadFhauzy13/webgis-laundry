@@ -87,7 +87,7 @@ require '../templates/navbar.php';
                                                                     <i class="ti ti-settings-2" style="font-size: 1.1rem;"></i>
                                                                 </button>
                                                                 <!-- Tombol Detail -->
-                                                                <button type="button" title="Lihat Detail" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal<?= $id_laundry ?>">
+                                                                <button type="button" title="Detail Laundry" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal<?= $id_laundry ?>">
                                                                     <i class="ti ti-eye" style="font-size: 1.1rem;"></i>
                                                                 </button>
                                                                 <!-- Tombol Edit -->

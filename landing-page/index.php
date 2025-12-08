@@ -218,23 +218,23 @@ $title = 'Geolaundry';
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Nama Laundry</label>
-                  <input id="m_nama" type="text" class="form-control" readonly>
+                  <input id="m_nama" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Layanan Khusus</label>
-                  <input id="m_khusus" type="text" class="form-control" readonly>
+                  <input id="m_khusus" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Layanan</label>
-                  <input id="m_layanan" type="text" class="form-control" readonly>
+                  <input id="m_layanan" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Alamat</label>
-                  <textarea id="m_alamat" class="form-control" rows="3" readonly></textarea>
+                  <textarea id="m_alamat" class="form-control form-control-plaintext" rows="1" readonly></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Profil / Deskripsi</label>
-                  <textarea id="m_profile" class="form-control" rows="3" readonly></textarea>
+                  <textarea id="m_profile" class="form-control form-control-plaintext" rows="3" readonly></textarea>
                 </div>
               </div>
             </div>
@@ -355,11 +355,17 @@ $title = 'Geolaundry';
 
   <?php
   // Ambil data dari database
-  $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_khusus.nama_layanan_khusus
-                                                        FROM laundry 
-                                                        INNER JOIN layanan_khusus 
-                                                        ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus 
-                                                        ORDER BY laundry.id_laundry DESC");
+  $result = mysqli_query($koneksi, "SELECT 
+                                          laundry.*, 
+                                          layanan_khusus.nama_layanan_khusus,
+                                          layanan.nama_layanan,
+                                          layanan.harga
+                                      FROM laundry
+                                      INNER JOIN layanan_khusus 
+                                          ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus
+                                      INNER JOIN layanan 
+                                          ON laundry.id_layanan = layanan.id_layanan
+                                      ORDER BY laundry.id_laundry DESC");
   ?>
   <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
   <script>
@@ -405,6 +411,7 @@ $title = 'Geolaundry';
       $no_telp  = $row['no_telp'];
       $jam_buka  = $row['jam_buka'];
       $nama_khusus  = $row['nama_layanan_khusus'];
+      $nama_layanan = $row['nama_layanan'];
       $foto = $row["foto"];
       $foto_url = "../laundry/" . $foto;
 
@@ -426,7 +433,9 @@ $title = 'Geolaundry';
             <button 
             class="btn btn-sm btn-info openModal"
             data-nama="<?= $nama ?>"
-            data-kategori="<?= $nama_khusus ?>"
+            data-khusus="<?= $nama_khusus ?>"
+            data-layanan= "<?= $nama_layanan ?>"
+            data-harga="<?= number_format($row['harga'] * 1000, 0, ',', '.') ?>"
             data-lat="<?= $lat ?>"
             data-lng="<?= $lng ?>"
             data-telp="<?= $no_telp ?>"
@@ -451,7 +460,8 @@ $title = 'Geolaundry';
         btn.addEventListener("click", function() {
 
           document.getElementById("m_nama").value = this.dataset.nama;
-          document.getElementById("m_khusus").value = this.dataset.kategori;
+          document.getElementById("m_khusus").value = this.dataset.khusus;
+          document.getElementById("m_layanan").value = `${this.dataset.layanan} - Rp ${this.dataset.harga}`;
           document.getElementById("m_lat").value = this.dataset.lat;
           document.getElementById("m_lng").value = this.dataset.lng;
           document.getElementById("m_telp").value = this.dataset.telp;

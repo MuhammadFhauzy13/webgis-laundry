@@ -67,13 +67,13 @@ require '../templates/navbar.php';
                                                     <td><?= htmlspecialchars($harga) ?></td>
                                                     <td>
                                                         <!-- Tombol Edit -->
-                                                        <button type="button" class="btn btn-sm btn-warning" title="Edit Kategori" data-bs-toggle="modal" data-bs-target="#editModal<?= $id_layanan ?>">
+                                                        <button type="button" class="btn btn-sm btn-warning" title="Edit Layanan" data-bs-toggle="modal" data-bs-target="#editModal<?= $id_layanan ?>">
                                                             <i class="ti ti-edit" style="font-size: 1.1rem;"></i>
                                                         </button>
                                                         <!-- Tombol Hapus -->
                                                         <a href="proses-layanan.php?id=<?= $id_layanan ?>"
                                                             class="btn btn-sm btn-danger btn-hapus"
-                                                            title="Hapus Kategori">
+                                                            title="Hapus Layanan">
                                                             <i class="ti ti-trash" style="font-size: 1.1rem;"></i>
                                                         </a>
 
