@@ -72,7 +72,7 @@ require 'templates/navbar.php';
                 <div class="card-body">
                     <div class="row">
                         <!-- Total Laundry -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <div class="card card-blue-solid card-hover shadow">
                                 <div class="card-body p-3">
                                     <h6 class="card-title mb-1"><i class="ti ti-wash-machine" style="font-size: 1.2rem; margin-right: 6px;"></i> Total Laundry</h6>
@@ -86,11 +86,11 @@ require 'templates/navbar.php';
                             </div>
                         </div>
 
-                        <!-- Total Kategori -->
-                        <div class="col-md-6 mb-3">
+                        <!-- Total layanan khusus -->
+                        <div class="col-md-4 mb-3">
                             <div class="card card-blue-solid card-hover shadow">
                                 <div class="card-body p-3">
-                                    <h6 class="card-title mb-1"><i class="ti ti-category" style="font-size: 1.2rem; margin-right: 6px;"></i> Total Kategori</h6>
+                                    <h6 class="card-title mb-1"><i class="ti ti-category" style="font-size: 1.2rem; margin-right: 6px;"></i> Total Layanan Khusus</h6>
                                     <h4 class="fw-bold mb-0"><?php
                                                                 $query1 = "SELECT COUNT(*) AS total_kategori FROM layanan_khusus;";
                                                                 $resultKategori = mysqli_query($koneksi, $query1);
@@ -100,6 +100,30 @@ require 'templates/navbar.php';
                                 </div>
                             </div>
                         </div>
+                        <!-- total layanan -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card card-blue-solid card-hover shadow">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title mb-1">
+                                        <i class="ti ti-tag" style="font-size: 1.2rem; margin-right: 6px;"></i> Total Layanan Biasa
+                                    </h6>
+                                    <h4 class="fw-bold mb-0">
+                                        <?php
+                                        $query = "SELECT COUNT(*) AS total_layanan FROM layanan";
+                                        $result = mysqli_query($koneksi, $query);
+
+                                        if ($result) {
+                                            $data = mysqli_fetch_assoc($result);
+                                            echo $data['total_layanan'];
+                                        } else {
+                                            echo "0"; // fallback jika query gagal
+                                        }
+                                        ?>
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

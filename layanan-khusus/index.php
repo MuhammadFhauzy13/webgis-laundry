@@ -46,68 +46,89 @@ require '../templates/navbar.php';
                                     <table class="datatable table table-hover align-middle table-responsive">
                                         <thead class="table-success text-center">
                                             <tr>
-                                                <th>No</th>
-                                                <th>Nama Layanan Khusus</th>
-                                                <th>Deskripsi</th>
-                                                <th>Aksi</th>
+                                                <th class="text-center">No</th>
+                                                <th class="text-center">Nama Layanan Khusus</th>
+                                                <th class="text-center">Deskripsi</th>
+                                                <th class="text-center">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody class="text-center">
                                             <?php
                                             $no = 1;
-                                            $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
-                                            while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
-                                                $id_layanan = $layanan['id_layanan_khusus'];
-                                                $nama_layanan = $layanan['nama_layanan_khusus'];
-                                                $deskripsi = $layanan['deskripsi'];
+                                            $queryLayanan = mysqli_query($koneksi, "
+                                                SELECT id_layanan_khusus, nama_layanan_khusus, deskripsi
+                                                FROM layanan_khusus
+                                                ORDER BY id_layanan_khusus DESC
+                                            ");
+                                            while ($lk = mysqli_fetch_assoc($queryLayanan)) {
+                                                $id         = $lk['id_layanan_khusus'];
+                                                $nama       = $lk['nama_layanan_khusus'];
+                                                $deskripsi  = $lk['deskripsi'];
                                             ?>
                                                 <tr>
                                                     <td><?= $no++ ?></td>
-                                                    <td><?= htmlspecialchars($nama_layanan) ?></td>
+                                                    <td><?= htmlspecialchars($nama) ?></td>
                                                     <td><?= htmlspecialchars($deskripsi) ?></td>
                                                     <td>
                                                         <!-- Tombol Edit -->
-                                                        <button type="button" class="btn btn-sm btn-warning" title="Edit Layanan Khusus" data-bs-toggle="modal" data-bs-target="#editModal<?= $id_layanan ?>">
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-warning"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editModal<?= $id ?>"
+                                                            title="Edit Layanan Khusus">
                                                             <i class="ti ti-edit" style="font-size: 1.1rem;"></i>
                                                         </button>
                                                         <!-- Tombol Hapus -->
-                                                        <a href="proses-layanan.php?id=<?= $id_layanan ?>"
+                                                        <a href="proses-layanan-khusus.php?id=<?= $id ?>"
                                                             class="btn btn-sm btn-danger btn-hapus"
                                                             title="Hapus Layanan Khusus">
                                                             <i class="ti ti-trash" style="font-size: 1.1rem;"></i>
                                                         </a>
-
                                                     </td>
                                                 </tr>
                                                 <!-- Modal Edit -->
-                                                <div class="modal fade" id="editModal<?= $id_layanan ?>" tabindex="-1"
-                                                    aria-labelledby="editModalLabel<?= $id_layanan ?>" aria-hidden="true">
+                                                <div class="modal fade" id="editModal<?= $id ?>" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content border-0 rounded-3 shadow">
+
                                                             <div class="modal-header bg-opacity-75" style="background-color:#02C3FE;">
-                                                                <h5 class="modal-title fw-semibold" id="editModalLabel<?= $id_layanan ?>">Edit Layanan Khusus</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                <h5 class="modal-title fw-semibold">Edit Layanan Khusus</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                             </div>
-                                                            <form action="proses-layanan.php" method="post" autocomplete="off">
+
+                                                            <form action="proses-layanan-khusus.php" method="post" autocomplete="off">
                                                                 <div class="modal-body">
-                                                                    <!-- ID -->
-                                                                    <input type="hidden" name="id_layanan" value="<?= $id_layanan ?>">
+
+                                                                    <input type="hidden" name="id_layanan_khusus" value="<?= $id ?>">
+
                                                                     <div class="mb-3">
-                                                                        <label for="layanan<?= $id_layanan ?>" class="form-label fw-semibold">Nama Layanan</label>
-                                                                        <input type="text" class="form-control" id="layanan<?= $id_layanan ?>"
-                                                                            name="layanan" value="<?= htmlspecialchars($nama_layanan) ?>" required>
+                                                                        <label class="form-label fw-semibold">Nama Layanan Khusus</label>
+                                                                        <input type="text"
+                                                                            class="form-control"
+                                                                            name="khusus"
+                                                                            value="<?= htmlspecialchars($nama) ?>"
+                                                                            required>
                                                                     </div>
+
                                                                     <div class="mb-3">
-                                                                        <label for="deskripsi<?= $id_layanan ?>" class="form-label fw-semibold">Deskripsi</label>
-                                                                        <textarea class="form-control" required id="deskripsi<?= $id_layanan ?>" name="deskripsi"
-                                                                            rows="3"><?= htmlspecialchars($deskripsi) ?></textarea>
+                                                                        <label class="form-label fw-semibold">Deskripsi</label>
+                                                                        <textarea class="form-control"
+                                                                            rows="3"
+                                                                            name="deskripsi"
+                                                                            required><?= htmlspecialchars($deskripsi) ?></textarea>
                                                                     </div>
+
                                                                 </div>
+
                                                                 <div class="modal-footer">
                                                                     <button type="button" class="btn btn-danger border" data-bs-dismiss="modal">Batal</button>
-                                                                    <button type="submit" name="update" class="btn btn-secondary text-white fw-semibold">Update</button>
+                                                                    <button type="submit" name="update" class="btn btn-secondary text-white fw-semibold">
+                                                                        Update
+                                                                    </button>
                                                                 </div>
+
                                                             </form>
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -122,16 +143,26 @@ require '../templates/navbar.php';
                             <div class="card shadow-sm border-0 rounded-3">
                                 <div class="card-body">
                                     <h6 class="card-title fw-semibold mb-3">Tambah Layanan Khusus</h6>
-                                    <form action="proses-layanan.php" method="post" autocomplete="off">
+                                    <form action="proses-layanan-khusus.php" method="post" autocomplete="off">
                                         <div class="mb-3">
-                                            <label for="layanan" class="form-label">Nama Layanan Khusus</label>
-                                            <input type="text" class="form-control" id="layanan" name="layanan" required>
+                                            <label for="nama_layanan" class="form-label">Nama Layanan Khusus</label>
+                                            <input type="text"
+                                                class="form-control"
+                                                id="nama_layanan"
+                                                name="nama_layanan"
+                                                required>
                                         </div>
                                         <div class="mb-3">
                                             <label for="deskripsi" class="form-label">Deskripsi</label>
-                                            <textarea class="form-control" id="deskripsi" name="deskripsi" required></textarea>
+                                            <textarea class="form-control"
+                                                id="deskripsi"
+                                                name="deskripsi"
+                                                rows="3"
+                                                required></textarea>
                                         </div>
-                                        <button type="submit" name="simpan" class="btn btn-outline-primary">Simpan</button>
+                                        <button type="submit" name="simpan" class="btn btn-outline-primary">
+                                            Simpan
+                                        </button>
                                     </form>
                                 </div>
                             </div>

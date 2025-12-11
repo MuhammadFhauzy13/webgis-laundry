@@ -225,7 +225,7 @@ $title = 'Geolaundry';
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Layanan</label>
-                  <input id="m_layanan" type="text" class="form-control form-control-plaintext" readonly>
+                  <textarea id="m_layanan" class="form-control form-control-plaintext" rows="1" readonly></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Alamat</label>
@@ -348,18 +348,26 @@ $title = 'Geolaundry';
     <i class="bi bi-arrow-up-short"></i>
   </a>
   <?php
-  // Ambil data dari database
-  $result = mysqli_query($koneksi, "SELECT 
-                                          laundry.*, 
-                                          layanan_khusus.nama_layanan_khusus,
-                                          layanan.nama_layanan,
-                                          layanan.harga
-                                      FROM laundry
-                                      INNER JOIN layanan_khusus 
-                                          ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus
-                                      INNER JOIN layanan 
-                                          ON laundry.id_layanan = layanan.id_layanan
-                                      ORDER BY laundry.id_laundry DESC");
+  $result = mysqli_query($koneksi, "
+    SELECT 
+        l.id_laundry,
+        l.nama_laundry,
+        l.latitude,
+        l.longitude,
+        l.no_telp,
+        l.jam_buka,
+        l.alamat,
+        l.profile,
+        l.foto,
+        lk.nama_layanan_khusus,
+        ly.nama_layanan,
+        ll.harga
+    FROM laundry l
+    LEFT JOIN layanan_khusus lk ON l.id_layanan_khusus = lk.id_layanan_khusus
+    LEFT JOIN laundry_layanan ll ON l.id_laundry = ll.id_laundry
+    LEFT JOIN layanan ly ON ll.id_layanan = ly.id_layanan
+    ORDER BY l.id_laundry, ly.nama_layanan
+");
   ?>
   <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
   <script>
@@ -388,68 +396,76 @@ $title = 'Geolaundry';
       "Satelit": satellite
     };
     L.control.layers(baseMaps).addTo(map);
-
-    // ===============================
-    // Tambahkan marker dari database
-    // ===============================
     <?php
-    mysqli_data_seek($result, 0); // reset pointer query
+    $laundryData = [];
     while ($row = mysqli_fetch_assoc($result)) {
-      $nama = addslashes($row['nama_laundry']);
-      $lat  = $row['latitude'];
-      $lng  = $row['longitude'];
-      $no_telp  = $row['no_telp'];
-      $jam_buka  = $row['jam_buka'];
-      $nama_khusus  = $row['nama_layanan_khusus'];
-      $nama_layanan = $row['nama_layanan'];
-      $foto = $row["foto"];
-      $foto_url = "../laundry/" . $foto;
-      // Validasi agar hanya koordinat valid yang ditampilkan
-      if (
-        is_numeric($lat) && is_numeric($lng) &&
-        $lat >= -90 && $lat <= 90 &&
-        $lng >= -180 && $lng <= 180
-      ) {
-    ?>
-        var marker = L.marker([<?= $lat ?>, <?= $lng ?>]).addTo(map);
-        marker.bindPopup(`
-            <b><?= $nama ?></b><br><br>
-            No Telpon: <?= $no_telp ?><br>
-            Jam Buka: <?= $jam_buka ?><br>
-            Layanan Khusus: <?= $nama_khusus ?><br><br>
-            <img src= "../laundry/<?= $foto ?>" width="120" alt="Foto laundry"><br><br>
-            <button 
-            class="btn btn-sm btn-info openModal"
-            data-nama="<?= $nama ?>"
-            data-khusus="<?= $nama_khusus ?>"
-            data-layanan= "<?= $nama_layanan ?>"
-            data-harga="<?= number_format($row['harga'] * 1000, 0, ',', '.') ?>"
-            data-lat="<?= $lat ?>"
-            data-lng="<?= $lng ?>"
-            data-telp="<?= $no_telp ?>"
-            data-jam="<?= $jam_buka ?>"
-            data-alamat="<?= addslashes($row['alamat']) ?>"
-            data-profile="<?= addslashes($row['profile']) ?>"
-            data-foto="../laundry/<?= $foto ?>">
-            Detail Laundry
-            </button>
-  
-            `);
-    <?php
+      $id = $row['id_laundry'];
+      if (!isset($laundryData[$id])) {
+        $laundryData[$id] = [
+          'nama_laundry' => addslashes($row['nama_laundry']),
+          'latitude' => $row['latitude'],
+          'longitude' => $row['longitude'],
+          'no_telp' => $row['no_telp'],
+          'jam_buka' => $row['jam_buka'],
+          'alamat' => addslashes($row['alamat']),
+          'profile' => addslashes($row['profile']),
+          'foto' => $row['foto'],
+          'nama_khusus' => $row['nama_layanan_khusus'],
+          'layanan' => []
+        ];
+      }
+      if ($row['nama_layanan']) {
+        $laundryData[$id]['layanan'][] = [
+          'nama' => $row['nama_layanan'],
+          'harga' => $row['harga']
+        ];
       }
     }
     ?>
-    // =====================================
-    // EVENT LISTENER UNTUK BUTTON MODAL
-    // =====================================
+    // Tambah marker
+    <?php foreach ($laundryData as $l) :
+      $lat = $l['latitude'];
+      $lng = $l['longitude'];
+      $foto_url = "../laundry/" . $l['foto'];
+
+      $layananText = [];
+      foreach ($l['layanan'] as $ly) {
+        $hargaRp = number_format($ly['harga'] * 1000, 0, ',', '.');
+        $layananText[] = $ly['nama'] . " - Rp " . $hargaRp;
+      }
+      $layananTextJS = implode(", ", $layananText);
+    ?>
+      var marker = L.marker([<?= $lat ?>, <?= $lng ?>]).addTo(map);
+      marker.bindPopup(`
+    <b><?= $l['nama_laundry'] ?></b><br><br>
+    No Telpon: <?= $l['no_telp'] ?><br>
+    Jam Buka: <?= $l['jam_buka'] ?><br>
+    Layanan Khusus: <?= $l['nama_khusus'] ?><br><br>
+    <img src="<?= $foto_url ?>" width="120" alt="Foto laundry"><br><br>
+    <button 
+        class="btn btn-sm btn-info openModal"
+        data-nama="<?= $l['nama_laundry'] ?>"
+        data-khusus="<?= $l['nama_khusus'] ?>"
+        data-layanan="<?= $layananTextJS ?>"
+        data-lat="<?= $lat ?>"
+        data-lng="<?= $lng ?>"
+        data-telp="<?= $l['no_telp'] ?>"
+        data-jam="<?= $l['jam_buka'] ?>"
+        data-alamat="<?= $l['alamat'] ?>"
+        data-profile="<?= $l['profile'] ?>"
+        data-foto="<?= $foto_url ?>">
+        Detail Laundry
+    </button>
+`);
+    <?php endforeach; ?>
+
     map.on("popupopen", function(e) {
       const btn = e.popup._container.querySelector(".openModal");
       if (btn) {
         btn.addEventListener("click", function() {
-
           document.getElementById("m_nama").value = this.dataset.nama;
           document.getElementById("m_khusus").value = this.dataset.khusus;
-          document.getElementById("m_layanan").value = `${this.dataset.layanan} - Rp ${this.dataset.harga}`;
+          document.getElementById("m_layanan").value = this.dataset.layanan;
           document.getElementById("m_lat").value = this.dataset.lat;
           document.getElementById("m_lng").value = this.dataset.lng;
           document.getElementById("m_telp").value = this.dataset.telp;
@@ -457,7 +473,6 @@ $title = 'Geolaundry';
           document.getElementById("m_alamat").value = this.dataset.alamat;
           document.getElementById("m_profile").value = this.dataset.profile;
           document.getElementById("m_foto").src = this.dataset.foto;
-
           let modal = new bootstrap.Modal(document.getElementById("detailModal"));
           modal.show();
         });

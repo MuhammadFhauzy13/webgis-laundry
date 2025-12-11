@@ -44,12 +44,13 @@ require '../templates/navbar.php';
                                         <table class="datatable table table-hover align-middle text-center">
                                             <thead class="table-success text-center">
                                                 <tr>
-                                                    <th>No</th>
-                                                    <th>Nama Laundry</th>
-                                                    <th>Kategori</th>
-                                                    <th>No. Telpon</th>
-                                                    <th>Jam Buka</th>
-                                                    <th>Aksi</th>
+                                                    <th class=" text-center">No</th>
+                                                    <th class=" text-center">Nama Laundry</th>
+                                                    <th class=" text-center">Kategori</th>
+                                                    <th class=" text-center">No. Telpon</th>
+                                                    <th class=" text-center">Jam Buka</th>
+                                                    <th class="text-center">Layanan</th>
+                                                    <th class=" text-center">Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="text-center">
@@ -58,40 +59,57 @@ require '../templates/navbar.php';
                                                 $queryLaundry = mysqli_query(
                                                     $koneksi,
                                                     "SELECT 
-                                                        laundry.*, 
-                                                        layanan_khusus.nama_layanan_khusus,
-                                                        layanan.nama_layanan,
-                                                        layanan.harga
-                                                    FROM laundry
-                                                    INNER JOIN layanan_khusus 
-                                                        ON laundry.id_layanan_khusus = layanan_khusus.id_layanan_khusus
-                                                    INNER JOIN layanan
-                                                        ON laundry.id_layanan = layanan.id_layanan
-                                                    ORDER BY laundry.id_laundry DESC;"
+                                                        l.*,
+                                                        lk.nama_layanan_khusus,
+
+                                                        -- Layanan + Harga: 'Cuci Kiloan (10000), Setrika (5000)'
+                                                        GROUP_CONCAT(
+                                                            DISTINCT CONCAT(ly.nama_layanan, ' (', ll.harga, ')')
+                                                            ORDER BY ly.nama_layanan ASC
+                                                            SEPARATOR ', '
+                                                        ) AS layanan,
+                                                        GROUP_CONCAT(DISTINCT ll.harga ORDER BY ly.nama_layanan ASC SEPARATOR ',') AS harga_list,
+                                                        GROUP_CONCAT(DISTINCT ll.id_layanan ORDER BY ly.nama_layanan ASC SEPARATOR ',') AS id_layanan_list
+                                                    FROM laundry l
+                                                    LEFT JOIN layanan_khusus lk 
+                                                        ON l.id_layanan_khusus = lk.id_layanan_khusus
+                                                    LEFT JOIN laundry_layanan ll 
+                                                        ON l.id_laundry = ll.id_laundry
+                                                    LEFT JOIN layanan ly 
+                                                        ON ll.id_layanan = ly.id_layanan
+                                                    GROUP BY l.id_laundry
+                                                    ORDER BY l.id_laundry DESC"
                                                 );
                                                 while ($laundry = mysqli_fetch_assoc($queryLaundry)) {
                                                     $id_laundry = $laundry['id_laundry'];
-                                                    $id_layanan = $laundry['id_layanan'];
                                                     $id_layanan_khusus = $laundry['id_layanan_khusus'];
+                                                    // layanan sudah berupa string "Cuci Kiloan (10000), Express (15000)" dari query
+                                                    $layananText = !empty($laundry['layanan'])
+                                                        ? htmlspecialchars($laundry['layanan'])
+                                                        : '-';
+                                                    $namaKhusus = !empty($laundry['nama_layanan_khusus']) ? htmlspecialchars($laundry['nama_layanan_khusus']) : '-';
                                                 ?>
                                                     <tr class="align-middle">
                                                         <td><?= $no++ ?></td>
                                                         <td><?= htmlspecialchars($laundry['nama_laundry']) ?></td>
-                                                        <td><?= $laundry['nama_layanan_khusus'] ?></td>
-                                                        <td><?= $laundry['no_telp'] ?></td>
-                                                        <td><?= $laundry['jam_buka'] ?></td>
+                                                        <td><?= $namaKhusus ?></td>
+                                                        <td><?= htmlspecialchars($laundry['no_telp']) ?></td>
+                                                        <td><?= htmlspecialchars($laundry['jam_buka']) ?></td>
+                                                        <td><?= htmlspecialchars($layananText) ?></td>
                                                         <td>
                                                             <div class="d-inline-flex gap-1">
-                                                                <!-- tombol layanan -->
-                                                                <button type="button" title="Kelola Layanan" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#layananModal">
-                                                                    <i class="ti ti-settings-2" style="font-size: 1.1rem;"></i>
-                                                                </button>
                                                                 <!-- Tombol Detail -->
-                                                                <button type="button" title="Detail Laundry" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal<?= $id_laundry ?>">
+                                                                <button type="button" title="Detail Laundry"
+                                                                    class="btn btn-sm btn-info"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#detailModal<?= $id_laundry ?>">
                                                                     <i class="ti ti-eye" style="font-size: 1.1rem;"></i>
                                                                 </button>
                                                                 <!-- Tombol Edit -->
-                                                                <button type="button" title="Edit Laundry" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $id_laundry ?>">
+                                                                <button type="button" title="Edit Laundry"
+                                                                    class="btn btn-sm btn-warning"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#editModal<?= $id_laundry ?>">
                                                                     <i class="ti ti-edit" style="font-size: 1.1rem;"></i>
                                                                 </button>
                                                                 <!-- Tombol Hapus -->
@@ -100,92 +118,135 @@ require '../templates/navbar.php';
                                                                     title="Hapus Laundry">
                                                                     <i class="ti ti-trash" style="font-size: 1.1rem;"></i>
                                                                 </a>
-
                                                             </div>
                                                         </td>
                                                     </tr>
                                                     <!-- Modal Detail -->
-                                                    <div class="modal fade" id="detailModal<?= $id_laundry ?>" tabindex="-1" aria-labelledby="detailModalLabel<?= $id_laundry ?>" aria-hidden="true">
+                                                    <div class="modal fade" id="detailModal<?= $id_laundry ?>" tabindex="-1" aria-hidden="true">
                                                         <div class="modal-dialog modal-lg modal-dialog-centered">
                                                             <div class="modal-content border-0 shadow">
+
                                                                 <div class="modal-header text-white" style="background-color: #02C3FE;">
-                                                                    <h5 class="modal-title" id="detailModalLabel<?= $id_laundry ?>">Detail Laundry</h5>
+                                                                    <h5 class="modal-title">Detail Laundry</h5>
                                                                     <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal"></button>
                                                                 </div>
+
                                                                 <div class="modal-body">
                                                                     <div class="row g-3">
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Nama Laundry</label>
                                                                             <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['nama_laundry']) ?>" readonly>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Nama Kecamatan</label>
                                                                             <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['nama_kecamatan']) ?>" readonly>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Longitude</label>
                                                                             <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['longitude']) ?>" readonly>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">No. Telepon</label>
                                                                             <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['no_telp']) ?>" readonly>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Latitude</label>
                                                                             <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['latitude']) ?>" readonly>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Jam Buka</label>
                                                                             <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['jam_buka']) ?>" readonly>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Alamat</label>
                                                                             <textarea class="form-control" rows="2" readonly><?= htmlspecialchars($laundry['alamat']) ?></textarea>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Profile</label>
                                                                             <textarea class="form-control" rows="2" readonly><?= htmlspecialchars($laundry['profile']) ?></textarea>
                                                                         </div>
+
                                                                         <div class="col-md-6">
                                                                             <label class="form-label fw-semibold">Layanan Khusus</label>
-                                                                            <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['nama_layanan_khusus']) ?>" readonly>
+                                                                            <input type="text" class="form-control" value="<?= htmlspecialchars($laundry['nama_layanan_khusus'] ?: '-') ?>" readonly>
                                                                         </div>
-                                                                        <?php
-                                                                        $raw = $laundry['harga'];                 // "15.000"
-                                                                        $clean = str_replace('.', '', $raw);      // "15000"
-                                                                        $hargaFormat = number_format($clean, 0, ',', '.'); // "15.000"
-                                                                        ?>
+
+                                                                        <!-- ================= LAYANAN BIASA ================= -->
                                                                         <div class="col-md-6">
-                                                                            <label class="form-label fw-semibold ">Layanan</label>
-                                                                            <div class="p-2 border rounded bg-light">
-                                                                                <div class="d-flex justify-content-between ">
-                                                                                    <span><?= htmlspecialchars($laundry['nama_layanan']) ?></span>
-                                                                                    <span>Rp <?= $hargaFormat ?></span>
-                                                                                </div>
+                                                                            <label class="form-label fw-semibold">Layanan</label>
+
+                                                                            <?php
+                                                                            $layananRaw = $laundry['layanan'];
+                                                                            $layananItems = $layananRaw ? explode(', ', $layananRaw) : [];
+                                                                            ?>
+
+                                                                            <div class="border rounded p-2 bg-light">
+
+                                                                                <?php if (!empty($layananItems)) : ?>
+
+                                                                                    <?php foreach ($layananItems as $item) : ?>
+                                                                                        <?php
+                                                                                        // Contoh item: Cuci Kiloan (10000)
+                                                                                        // Regex lebih aman untuk nama layanan yang mengandung koma
+                                                                                        if (preg_match('/^(.*)\((\d+)\)$/', trim($item), $m)) {
+                                                                                            $namaL = trim($m[1]);
+                                                                                            $hargaL = number_format((int)$m[2], 0, ',', '.');
+                                                                                        } else {
+                                                                                            $namaL = trim($item);
+                                                                                            $hargaL = '0';
+                                                                                        }
+                                                                                        ?>
+                                                                                        <div class="d-flex justify-content-between border-bottom py-1">
+                                                                                            <span><?= htmlspecialchars($namaL) ?></span>
+                                                                                            <span>Rp <?= $hargaL ?></span>
+                                                                                        </div>
+                                                                                    <?php endforeach; ?>
+
+                                                                                <?php else : ?>
+                                                                                    <small class="text-muted fst-italic">Tidak ada layanan.</small>
+                                                                                <?php endif; ?>
+
                                                                             </div>
                                                                         </div>
 
-
+                                                                        <!-- ================= FOTO ================= -->
                                                                         <div class="col-md-6 text-center">
                                                                             <label class="form-label fw-semibold d-block">Foto Laundry</label>
-                                                                            <img src="<?= htmlspecialchars($laundry['foto']) ?>"
-                                                                                class="img-thumbnail rounded"
-                                                                                width="150"
+
+                                                                            <?php
+                                                                            $foto = $laundry['foto'] ?: 'assets/no-image.png';
+                                                                            ?>
+
+                                                                            <img src="<?= htmlspecialchars($foto) ?>"
+                                                                                class="img-thumbnail rounded shadow-sm"
+                                                                                width="160"
                                                                                 alt="Foto Laundry">
                                                                         </div>
+
                                                                     </div>
                                                                 </div>
+
                                                                 <div class="modal-footer d-flex justify-content-end">
                                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                                                 </div>
+
                                                             </div>
                                                         </div>
                                                     </div>
+
                                                     <!-- Modal Edit -->
                                                     <div class="modal fade" id="editModal<?= $id_laundry ?>" tabindex="-1" aria-labelledby="editModalLabel<?= $id_laundry ?>" aria-hidden="true">
                                                         <div class="modal-dialog modal-lg modal-dialog-centered">
                                                             <div class="modal-content border-0 shadow">
-                                                                <div class="modal-header" style="background-color:#02C3FE ;">
+                                                                <div class="modal-header" style="background-color:#02C3FE;">
                                                                     <h5 class="modal-title" id="editModalLabel<?= $id_laundry ?>">Edit Laundry</h5>
                                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                                 </div>
@@ -195,27 +256,33 @@ require '../templates/navbar.php';
                                                                         <div class="row g-3">
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Nama Laundry</label>
-                                                                                <input type="text" name="namaLaundry" class="form-control" value="<?= htmlspecialchars($laundry['nama_laundry']) ?>" required>
+                                                                                <input type="text" name="namaLaundry" class="form-control"
+                                                                                    value="<?= htmlspecialchars($laundry['nama_laundry']) ?>" required>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Nama Kecamatan</label>
-                                                                                <input type="text" name="namaKecamatan" class="form-control" value="<?= htmlspecialchars($laundry['nama_kecamatan']) ?>" required>
+                                                                                <input type="text" name="namaKecamatan" class="form-control"
+                                                                                    value="<?= htmlspecialchars($laundry['nama_kecamatan']) ?>" required>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Longitude</label>
-                                                                                <input type="number" step="any" name="longitude" class="form-control" value="<?= htmlspecialchars($laundry['longitude']) ?>" required>
+                                                                                <input type="number" step="any" name="longitude" class="form-control"
+                                                                                    value="<?= htmlspecialchars($laundry['longitude']) ?>" required>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">No. Telepon</label>
-                                                                                <input type="text" name="telpLaundry" class="form-control" value="<?= htmlspecialchars($laundry['no_telp']) ?>" required>
+                                                                                <input type="text" name="telpLaundry" class="form-control"
+                                                                                    value="<?= htmlspecialchars($laundry['no_telp']) ?>" required>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Latitude</label>
-                                                                                <input type="number" step="any" name="latitude" class="form-control" value="<?= htmlspecialchars($laundry['latitude']) ?>" required>
+                                                                                <input type="number" step="any" name="latitude" class="form-control"
+                                                                                    value="<?= htmlspecialchars($laundry['latitude']) ?>" required>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Jam Buka</label>
-                                                                                <input type="text" name="jamBuka" class="form-control" value="<?= htmlspecialchars($laundry['jam_buka']) ?>" required>
+                                                                                <input type="text" name="jamBuka" class="form-control"
+                                                                                    value="<?= htmlspecialchars($laundry['jam_buka']) ?>" required>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Alamat</label>
@@ -229,30 +296,64 @@ require '../templates/navbar.php';
                                                                                 <label class="form-label">Layanan Khusus</label>
                                                                                 <select name="id_layanan_khusus" class="form-control" required>
                                                                                     <?php
-                                                                                    $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
-                                                                                    while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
-                                                                                        $selected = ($layanan['id_layanan_khusus'] == $laundry['id_layanan_khusus']) ? 'selected' : '';
-                                                                                        echo "<option value='{$layanan['id_layanan_khusus']}' $selected>{$layanan['nama_layanan_khusus']}</option>";
+                                                                                    $queryLayananKhusus = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
+                                                                                    while ($lk = mysqli_fetch_assoc($queryLayananKhusus)) {
+                                                                                        $selected = ($lk['id_layanan_khusus'] == $laundry['id_layanan_khusus']) ? 'selected' : '';
+                                                                                        echo "<option value='{$lk['id_layanan_khusus']}' $selected>{$lk['nama_layanan_khusus']}</option>";
                                                                                     }
                                                                                     ?>
                                                                                 </select>
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <label class="form-label">Layanan</label>
-                                                                                <select name="id_layanan" class="form-control" required>
+                                                                                <?php
+                                                                                // pisahkan id dan harga
+                                                                                $selectedIds   = $laundry['id_layanan_list'] ? explode(',', $laundry['id_layanan_list']) : [];
+                                                                                $selectedHarga = $laundry['harga_list'] ? explode(',', $laundry['harga_list']) : [];
+                                                                                // mapping id_layanan → harga nya
+                                                                                $hargaMap = [];
+                                                                                foreach ($selectedIds as $i => $idLy) {
+                                                                                    $hargaMap[(int)$idLy] = isset($selectedHarga[$i]) ? (int)$selectedHarga[$i] : 0;
+                                                                                }
+                                                                                ?>
+                                                                                <div class="border rounded p-2 bg-light" style="max-height:180px; overflow-y:auto;">
                                                                                     <?php
-                                                                                    $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan");
-                                                                                    while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
-                                                                                        $selected = ($layanan['id_layanan'] == $laundry['id_layanan']) ? 'selected' : '';
-                                                                                        echo "<option value='{$layanan['id_layanan']}' $selected>{$layanan['nama_layanan']}</option>";
-                                                                                    }
+                                                                                    $qLayanan = mysqli_query($koneksi, "SELECT * FROM layanan ORDER BY id_layanan ASC");
+                                                                                    while ($ly = mysqli_fetch_assoc($qLayanan)) :
+                                                                                        $idL = (int)$ly['id_layanan'];
+                                                                                        $checked = in_array($idL, $selectedIds) ? "checked" : "";
+                                                                                        $hargaValue = $hargaMap[$idL] ?? "";
                                                                                     ?>
-                                                                                </select>
+                                                                                        <div class="d-flex align-items-center mb-1">
+                                                                                            <input type="checkbox"
+                                                                                                name="layanan_id[]"
+                                                                                                value="<?= $idL ?>"
+                                                                                                class="form-check-input me-2 layanan-check"
+                                                                                                data-target="harga<?= $id_laundry ?>_<?= $idL ?>"
+                                                                                                <?= $checked ?>>
+                                                                                            <label class="me-2"><?= htmlspecialchars($ly['nama_layanan']) ?></label>
+                                                                                            <input type="number"
+                                                                                                name="layanan_harga[<?= $idL ?>]"
+                                                                                                id="harga<?= $id_laundry ?>_<?= $idL ?>"
+                                                                                                class="form-control form-control-sm"
+                                                                                                placeholder="Harga"
+                                                                                                style="width:120px;"
+                                                                                                value="<?= $hargaValue ?>"
+                                                                                                <?= $checked ? '' : 'readonly' ?>>
+
+                                                                                        </div>
+                                                                                    <?php endwhile; ?>
+                                                                                </div>
                                                                             </div>
+                                                                            <!-- FOTO -->
                                                                             <div class="col-md-6 text-center">
                                                                                 <label class="form-label d-block">Foto Laundry</label>
-                                                                                <img src="<?= htmlspecialchars($laundry['foto']) ?>" class="img-thumbnail mb-2 rounded" id="previewEdit<?= $id_laundry ?>" width="120">
-                                                                                <input type="file" name="fotoLaundry" class="form-control form-control-sm" onchange="previewEditLaundry('previewEdit<?= $id_laundry ?>', this)">
+                                                                                <img src="<?= htmlspecialchars($laundry['foto']) ?>"
+                                                                                    class="img-thumbnail mb-2 rounded"
+                                                                                    id="previewEdit<?= $id_laundry ?>"
+                                                                                    width="120">
+                                                                                <input type="file" name="fotoLaundry" class="form-control form-control-sm"
+                                                                                    onchange="previewEditLaundry('previewEdit<?= $id_laundry ?>', this)">
                                                                                 <input type="hidden" name="fotoLama" value="<?= htmlspecialchars($laundry['foto']) ?>">
                                                                             </div>
                                                                         </div>
@@ -265,170 +366,23 @@ require '../templates/navbar.php';
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <script>
+                                                        document.querySelectorAll('.layanan-check').forEach(cb => {
+                                                            cb.addEventListener('change', function() {
+                                                                let target = document.getElementById(this.dataset.target);
+
+                                                                if (this.checked) {
+                                                                    target.readOnly = false;
+                                                                } else {
+                                                                    target.readOnly = true;
+                                                                }
+                                                            });
+                                                        });
+                                                    </script>
+
                                                 <?php } ?>
                                             </tbody>
                                         </table>
-                                        <!-- Modal Layanan -->
-                                        <?php
-                                        // Ambil data layanan sekali saja
-                                        $layananData = [];
-                                        $queryL = mysqli_query($koneksi, "SELECT * FROM layanan ORDER BY id_layanan DESC");
-                                        while ($row = mysqli_fetch_assoc($queryL)) {
-                                            $layananData[] = $row;
-                                        }
-                                        ?>
-
-                                        <div class="modal fade" id="layananModal" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                                <div class="modal-content border-0 shadow">
-
-                                                    <div class="modal-header bg-secondary text-white">
-                                                        <h5 class="modal-title">Manajemen Layanan</h5>
-                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                    </div>
-
-                                                    <div class="modal-body">
-
-                                                        <!-- Tabs -->
-                                                        <ul class="nav nav-tabs mb-3" id="layananTab" role="tablist">
-                                                            <li class="nav-item" role="presentation">
-                                                                <button class="nav-link active"
-                                                                    id="list-tab"
-                                                                    data-bs-toggle="tab"
-                                                                    data-bs-target="#listLayanan"
-                                                                    type="button" role="tab">
-                                                                    Daftar Layanan
-                                                                </button>
-                                                            </li>
-
-                                                            <li class="nav-item" role="presentation">
-                                                                <button class="nav-link"
-                                                                    id="tambah-tab"
-                                                                    data-bs-toggle="tab"
-                                                                    data-bs-target="#tambahLayanan"
-                                                                    type="button" role="tab">
-                                                                    Tambah Layanan
-                                                                </button>
-                                                            </li>
-                                                        </ul>
-
-                                                        <div class="tab-content">
-
-                                                            <!-- TAB 1: LIST LAYANAN -->
-                                                            <div class="tab-pane fade show active" id="listLayanan" role="tabpanel">
-                                                                <div class="table-responsive">
-                                                                    <table class="datatable table table-bordered text-center align-middle">
-                                                                        <thead class="table-success">
-                                                                            <tr>
-                                                                                <th>No</th>
-                                                                                <th>Nama Layanan</th>
-                                                                                <th>Harga / Kg</th>
-                                                                                <th>Aksi</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <?php $no = 1;
-                                                                            foreach ($layananData as $layanan) : ?>
-                                                                                <tr>
-                                                                                    <td><?= $no++ ?></td>
-                                                                                    <td><?= htmlspecialchars($layanan['nama_layanan']) ?></td>
-                                                                                    <td><?= number_format($layanan['harga'], 0, ',', '.') ?></td>
-                                                                                    <td>
-                                                                                        <div class="d-inline-flex gap-1">
-
-                                                                                            <!-- Tombol Edit -->
-                                                                                            <button class="btn btn-sm btn-warning"
-                                                                                                data-bs-toggle="modal"
-                                                                                                data-bs-target="#editLayananModal<?= $layanan['id_layanan'] ?>">
-                                                                                                <i class="ti ti-edit"></i>
-                                                                                            </button>
-
-                                                                                            <!-- Tombol Hapus -->
-                                                                                            <a href="proses-layanan.php?hapus=<?= $layanan['id_layanan'] ?>"
-                                                                                                class="btn btn-sm btn-danger btn-hapus">
-                                                                                                <i class="ti ti-trash"></i>
-                                                                                            </a>
-
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            <?php endforeach; ?>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- TAB 2: TAMBAH LAYANAN -->
-                                                            <div class="tab-pane fade" id="tambahLayanan" role="tabpanel">
-                                                                <form action="proses-layanan.php" method="POST">
-                                                                    <div class="mb-3">
-                                                                        <label>Nama Layanan</label>
-                                                                        <input type="text" name="nama_layanan" class="form-control" required>
-                                                                    </div>
-
-                                                                    <div class="mb-3">
-                                                                        <label>Harga / Kg</label>
-                                                                        <input type="number" name="harga" class="form-control" min="100" required>
-                                                                    </div>
-
-                                                                    <button type="submit" name="tambah" class="btn btn-secondary mt-2">
-                                                                        Tambah
-                                                                    </button>
-                                                                </form>
-                                                            </div>
-
-                                                        </div>
-
-                                                        <!-- Modal Edit Layanan -->
-                                                        <?php foreach ($layananData as $layanan) : ?>
-                                                            <div class="modal fade" id="editLayananModal<?= $layanan['id_layanan'] ?>" tabindex="-1">
-                                                                <div class="modal-dialog modal-dialog-centered">
-                                                                    <div class="modal-content border-0 shadow">
-
-                                                                        <div class="modal-header bg-warning">
-                                                                            <h5 class="modal-title">Edit Layanan</h5>
-                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                                        </div>
-
-                                                                        <form action="proses-layanan.php" method="POST">
-                                                                            <div class="modal-body">
-
-                                                                                <input type="hidden" name="id_layanan" value="<?= $layanan['id_layanan'] ?>">
-
-                                                                                <div class="mb-3">
-                                                                                    <label>Nama Layanan</label>
-                                                                                    <input type="text" name="nama_layanan" class="form-control"
-                                                                                        value="<?= htmlspecialchars($layanan['nama_layanan']) ?>" required>
-                                                                                </div>
-
-                                                                                <div class="mb-3">
-                                                                                    <label>Harga / Kg</label>
-                                                                                    <input type="number" name="harga" class="form-control"
-                                                                                        value="<?= $layanan['harga'] ?>" required>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                            <div class="modal-footer">
-                                                                                <button type="submit" name="update" class="btn btn-warning">Update</button>
-                                                                            </div>
-                                                                        </form>
-
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        <?php endforeach; ?>
-
-                                                    </div>
-
-                                                    <div class="modal-footer">
-                                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-
                                     </div>
                                 </div>
                             </div>
@@ -443,7 +397,7 @@ require '../templates/navbar.php';
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">Nama Laundry</label>
-                                                <input type="text" name="namaLaundry" class="form-control" id="addNamaLaundry" required>
+                                                <input type="text" name="namaLaundry" class="form-control" required>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Nama Kecamatan</label>
@@ -479,40 +433,77 @@ require '../templates/navbar.php';
                                                     <option value="">-- Pilih Layanan Khusus --</option>
                                                     <?php
                                                     $queryLayananKhusus = mysqli_query($koneksi, "SELECT * FROM layanan_khusus");
-                                                    while ($layanan = mysqli_fetch_assoc($queryLayananKhusus)) {
-                                                        echo "<option value='{$layanan['id_layanan_khusus']}'>{$layanan['nama_layanan_khusus']}</option>";
+                                                    while ($lk = mysqli_fetch_assoc($queryLayananKhusus)) {
+                                                        echo "<option value='{$lk['id_layanan_khusus']}'>{$lk['nama_layanan_khusus']}</option>";
                                                     }
                                                     ?>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Layanan</label>
-                                                <select name="id_layanan" class="form-control" required>
-                                                    <option value="">-- Pilih Layanan --</option>
+                                                <div class="border rounded p-2 bg-light" style="max-height:180px; overflow-y:auto;">
                                                     <?php
-                                                    $queryLayanan = mysqli_query($koneksi, "SELECT * FROM layanan");
-                                                    while ($layanan = mysqli_fetch_assoc($queryLayanan)) {
-                                                        echo "<option value='{$layanan['id_layanan']}'>{$layanan['nama_layanan']}</option>";
-                                                    }
+                                                    $qLayanan = mysqli_query($koneksi, "SELECT * FROM layanan ORDER BY id_layanan ASC");
+                                                    while ($ly = mysqli_fetch_assoc($qLayanan)) :
+                                                        $idL = $ly['id_layanan'];
                                                     ?>
-                                                </select>
+                                                        <div class="d-flex align-items-center mb-1">
+                                                            <input type="checkbox"
+                                                                name="layanan_id[]"
+                                                                value="<?= $idL ?>"
+                                                                class="form-check-input me-2 add-layanan-check"
+                                                                data-target="hargaAdd_<?= $idL ?>">
+                                                            <label class="me-2"><?= htmlspecialchars($ly['nama_layanan']) ?></label>
+                                                            <input type="number"
+                                                                name="layanan_harga[<?= $idL ?>]"
+                                                                id="hargaAdd_<?= $idL ?>"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="Harga"
+                                                                style="width:120px;"
+                                                                disabled>
+                                                        </div>
+                                                    <?php endwhile; ?>
+                                                </div>
                                             </div>
+                                            <!-- FOTO -->
                                             <div class="col-md-6 text-center">
                                                 <label class="form-label d-block">Foto Laundry</label>
-                                                <!-- Gambar Preview -->
-                                                <img src="<?= $main_url ?>laundry/uploads/Geolaundry-removebg-preview.png" class="img-thumbnail mb-2 rounded" id="previewLaundry" width="120px">
-                                                <!-- Input File -->
-                                                <input type="file" name="fotoLaundry" class="form-control form-control-sm" id="inputLaundry" accept="image/*" onchange="imgLaundryView()">
+                                                <img src="<?= $main_url ?>laundry/uploads/Geolaundry-removebg-preview.png"
+                                                    class="img-thumbnail mb-2 rounded"
+                                                    id="previewLaundry"
+                                                    width="120">
+                                                <input type="file"
+                                                    name="fotoLaundry"
+                                                    id="inputLaundry"
+                                                    class="form-control form-control-sm"
+                                                    accept="image/*"
+                                                    onchange="imgLaundryView()">
                                             </div>
                                         </div>
+
                                         <div class="mt-3 d-flex gap-2">
-                                            <button type="reset" class="btn btn-outline-danger" onclick="resetLaundry()">Reset</button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="resetLaundry()">Reset</button>
                                             <button type="submit" name="simpan" class="btn btn-outline-primary">Simpan</button>
                                         </div>
+
+
                                     </form>
                                 </div>
                             </div>
                         </div>
+
+                        <script>
+                            document.querySelectorAll('.add-layanan-check').forEach(cb => {
+                                cb.addEventListener('change', function() {
+                                    const target = document.getElementById(this.dataset.target);
+                                    target.disabled = !this.checked;
+
+                                    // kosongkan harga hanya saat uncheck (tambahan)
+                                    if (!this.checked) target.value = "";
+                                });
+                            });
+                        </script>
+
                     </div> <!-- end tab content -->
                 </div>
             </div>

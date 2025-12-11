@@ -73,23 +73,22 @@ $current_folder = basename(dirname($_SERVER['PHP_SELF']));
                             <!-- Icon Map -->
                             <i class="ti ti-map-pin" style="font-size: 1.5rem;"></i>
                         </span>
-                        <span class="hide-menu">Map</span>
+                        <span class="hide-menu">Peta</span>
                     </a>
                 </li>
-                <li class="nav-small-cap">
+                <!-- <li class="nav-small-cap">
                     <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                     <span class="hide-menu">Laporan</span>
-                </li>
+                </li> -->
                 <!-- Rekap -->
-                <li class="sidebar-item <?= ($current_folder == 'rekap') ? 'active' : '' ?>">
+                <!-- <li class="sidebar-item <?= ($current_folder == 'rekap') ? 'active' : '' ?>">
                     <a class="sidebar-link" href="<?= $main_url ?>rekap/index.php" aria-expanded="false">
                         <span>
-                            <!-- Icon rekap -->
                             <i class="ti ti-clipboard-text" style="font-size: 1.5rem;"></i>
                         </span>
                         <span class="hide-menu">Rekap</span>
                     </a>
-                </li>
+                </li> -->
             </ul>
         </nav>
 
