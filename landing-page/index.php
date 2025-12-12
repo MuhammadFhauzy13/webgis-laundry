@@ -36,9 +36,7 @@ $title = 'Geolaundry';
   <link href="<?= $main_url ?>landing-page/assets/css/main.css" rel="stylesheet">
 
   <!--leaflet  -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Leaflet Fullscreen Plugin -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" />
@@ -215,25 +213,25 @@ $title = 'Geolaundry';
                     <img id="m_foto" src="" class="rounded foto-laundry" width="150" alt="Foto Laundry">
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label class="form-label fw-semibold">Nama Laundry</label>
                   <input id="m_nama" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label class="form-label fw-semibold">Layanan Khusus</label>
                   <input id="m_khusus" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Layanan</label>
-                  <textarea id="m_layanan" class="form-control form-control-plaintext" rows="1" readonly></textarea>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Alamat</label>
-                  <textarea id="m_alamat" class="form-control form-control-plaintext" rows="1" readonly></textarea>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Jam Buka</label>
+                  <input id="m_jam" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Profil / Deskripsi</label>
                   <textarea id="m_profile" class="form-control form-control-plaintext" rows="3" readonly></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Layanan</label>
+                  <textarea id="m_layanan" class="form-control form-control-plaintext" rows="1" readonly></textarea>
                 </div>
               </div>
             </div>
@@ -242,20 +240,21 @@ $title = 'Geolaundry';
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Latitude</label>
-                  <input id="m_lat" type="text" class="form-control" readonly>
+                  <input id="m_lat" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Longitude</label>
-                  <input id="m_lng" type="text" class="form-control" readonly>
+                  <input id="m_lng" type="text" class="form-control form-control-plaintext" readonly>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Alamat</label>
+                  <textarea id="m_alamat" class="form-control form-control-plaintext" rows="1" readonly></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">No. Telepon</label>
-                  <input id="m_telp" type="text" class="form-control" readonly>
+                  <input id="m_telp" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Jam Buka</label>
-                  <input id="m_jam" type="text" class="form-control" readonly>
-                </div>
+
               </div>
             </div>
           </div>
@@ -292,8 +291,7 @@ $title = 'Geolaundry';
   </header>
   <main class="main">
     <!-- Hero Section -->
-    <section id="hero" class="hero section light-background d-flex align-items-center"
-      style="background: url('<?= $main_url ?>landing-page/assets/img/hero-bg.jpg') no-repeat center center / cover;">
+    <section id="hero" class="hero section light-background d-flex align-items-center" style="background: url('<?= $main_url ?>landing-page/assets/img/hero-bg.jpg') no-repeat center center / cover;">
       <div class="container text-white">
         <div class="row gy-4">
           <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="zoom-out">
@@ -430,7 +428,7 @@ $title = 'Geolaundry';
 
       $layananText = [];
       foreach ($l['layanan'] as $ly) {
-        $hargaRp = number_format($ly['harga'] * 1000, 0, ',', '.');
+        $hargaRp = number_format($ly['harga'], 0, ',', '.');
         $layananText[] = $ly['nama'] . " - Rp " . $hargaRp;
       }
       $layananTextJS = implode(", ", $layananText);
