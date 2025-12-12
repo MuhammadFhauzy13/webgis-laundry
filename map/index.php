@@ -47,42 +47,34 @@ $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_khusus.nama_layanan_
 ?>
 
 <script>
-    // Inisialisasi peta di Ternate
+    // pas buka muncul ternate
     var map = L.map('map', {
         center: [0.80825206, 127.34063399],
         zoom: 13,
-        fullscreenControl: true // ← ini penting
+        fullscreenControl: true //
     });
 
-
-    // Hilangkan tulisan "Leaflet"
     map.attributionControl.setPrefix(false);
-
     // Basemap OpenStreetMap
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
-
-    // Basemap Satelit (Esri)
+    // Basemap Satelit
     var satellite = L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics'
         }
     );
-
-    // Kontrol untuk ganti basemap
+    //ganti basemap
     var baseMaps = {
         "OpenStreetMap": osm,
         "Satelit": satellite
     };
     L.control.layers(baseMaps).addTo(map);
-
-    // ===============================
-    // Tambahkan marker dari database
-    // ===============================
+    // tambah marker
     <?php
-    mysqli_data_seek($result, 0); // reset pointer query
+    mysqli_data_seek($result, 0);
     while ($row = mysqli_fetch_assoc($result)) {
         $nama = addslashes($row['nama_laundry']);
         $lat  = $row['latitude'];
@@ -92,8 +84,7 @@ $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_khusus.nama_layanan_
         $kategori = $row['nama_layanan_khusus'];
         $foto = $row["foto"];
         $foto_url = "../laundry/" . $foto;
-
-        // Validasi agar hanya koordinat valid yang ditampilkan
+        // hany koordinat valid yang ditampilkan
         if (
             is_numeric($lat) && is_numeric($lng) &&
             $lat >= -90 && $lat <= 90 &&

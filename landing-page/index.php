@@ -182,7 +182,7 @@ $title = 'Geolaundry';
             showConfirmButton: false
         });
     </script>';
-    unset($_SESSION['flash_logout']); // Hapus pesan agar tidak muncul lagi saat refresh
+    unset($_SESSION['flash_logout']);
   }
   ?>
   <!-- modal detail -->
@@ -254,7 +254,6 @@ $title = 'Geolaundry';
                   <label class="form-label fw-semibold">No. Telepon</label>
                   <input id="m_telp" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
-
               </div>
             </div>
           </div>
@@ -265,7 +264,7 @@ $title = 'Geolaundry';
       </div>
     </div>
   </div>
-  <!-- ======= Header ======= -->
+  <!-- Header -->
   <header id="header" class="header sticky-top">
     <!-- Branding & Nav -->
     <div class="branding d-flex align-items-center" style="background-color: #02C3FE;">
@@ -322,7 +321,6 @@ $title = 'Geolaundry';
           </div>
         </div>
       </div>
-
     </section>
   </main>
   <!-- ======= Footer ======= -->
@@ -369,26 +367,25 @@ $title = 'Geolaundry';
   ?>
   <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
   <script>
-    // Inisialisasi peta di Ternate
+    // pas buka peta di Ternate
     var map = L.map('map', {
       center: [0.80825206, 127.34063399],
       zoom: 13,
       fullscreenControl: true
     });
-    // Hilangkan tulisan "Leaflet"
     map.attributionControl.setPrefix(false);
     // Basemap OpenStreetMap
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
-    // Basemap Satelit (Esri)
+    // Basemap Satelit 
     var satellite = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics'
       }
     );
-    // Kontrol untuk ganti basemap
+    // ganti basemap
     var baseMaps = {
       "OpenStreetMap": osm,
       "Satelit": satellite

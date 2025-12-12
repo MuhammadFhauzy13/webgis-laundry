@@ -4,8 +4,6 @@ ini_set('display_errors', 1);
 require '../config.php';
 // tambah data
 if (isset($_POST['simpan'])) {
-
-    // --- Ambil input dasar ---
     $nama        = trim($_POST['namaLaundry']);
     $kecamatan   = trim($_POST['namaKecamatan']);
     $longitude   = trim($_POST['longitude']);
@@ -15,13 +13,11 @@ if (isset($_POST['simpan'])) {
     $alamat      = trim($_POST['alamatLaundry']);
     $profile     = trim($_POST['profile']);
     $id_layananKhusus = intval($_POST['id_layanan_khusus']);
-    $id_user     = 1; // tetap satu admin
-
-    // --- Ambil layanan & harga ---
+    $id_user     = 1;
     $layanan_id_raw    = $_POST['layanan_id'] ?? [];
     $layanan_harga_raw = $_POST['layanan_harga'] ?? [];
 
-    // --- Validasi koordinat ---
+    //validasi koordinat
     if (!is_numeric($latitude) || !is_numeric($longitude)) {
         header("Location:index.php?msg=invalid_number");
         exit;
@@ -31,11 +27,8 @@ if (isset($_POST['simpan'])) {
         header("Location:index.php?msg=invalid_range");
         exit;
     }
-
-    // --- Validasi layanan + harga ---
     $final_layanan_id = [];
     $final_harga      = [];
-
     foreach ($layanan_id_raw as $id) {
         $id    = intval($id);
         $harga = isset($layanan_harga_raw[$id]) ? intval($layanan_harga_raw[$id]) : 0;
@@ -43,34 +36,25 @@ if (isset($_POST['simpan'])) {
         $final_layanan_id[] = $id;
         $final_harga[]      = $harga;
     }
-
-    // --- Foto default ---
+    // foto default
     $defaultFoto = 'uploads/Geolaundry-removebg-preview.png';
     $uploadDir   = __DIR__ . '/uploads/';
-
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
-
     $fotoPath = $defaultFoto;
-
-    // --- Upload foto ---
+    //upload foto
     if (!empty($_FILES['fotoLaundry']['name']) && $_FILES['fotoLaundry']['error'] === UPLOAD_ERR_OK) {
-
         $ext = strtolower(pathinfo($_FILES['fotoLaundry']['name'], PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
         if (in_array($ext, $allowed)) {
             $fotoName = 'laundry_' . uniqid() . '.' . $ext;
             $targetPath = $uploadDir . $fotoName;
-
             if (move_uploaded_file($_FILES['fotoLaundry']['tmp_name'], $targetPath)) {
                 $fotoPath = 'uploads/' . $fotoName;
             }
         }
     }
-
-    // --- Insert ke tabel laundry ---
     $stmt = mysqli_prepare(
         $koneksi,
         "INSERT INTO laundry 
@@ -78,9 +62,7 @@ if (isset($_POST['simpan'])) {
         id_layanan_khusus, id_user, foto)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
-
     if ($stmt) {
-
         mysqli_stmt_bind_param(
             $stmt,
             "ssddssssiis",
@@ -96,46 +78,32 @@ if (isset($_POST['simpan'])) {
             $id_user,
             $fotoPath
         );
-
         if (mysqli_stmt_execute($stmt)) {
-
-            // --- Ambil ID laundry baru ---
             $idLaundryBaru = mysqli_insert_id($koneksi);
-
-            // --- Insert ke tabel LAUNDRY_LAYANAN ---
             $stmtRelasi = mysqli_prepare(
                 $koneksi,
                 "INSERT INTO laundry_layanan (id_laundry, id_layanan, harga) VALUES (?, ?, ?)"
             );
-
             foreach ($final_layanan_id as $index => $idLy) {
                 $harga = $final_harga[$index];
-
                 mysqli_stmt_bind_param($stmtRelasi, "iii", $idLaundryBaru, $idLy, $harga);
                 mysqli_stmt_execute($stmtRelasi);
             }
-
             mysqli_stmt_close($stmtRelasi);
-
             header("Location:index.php?msg=add_success");
             exit;
         } else {
             header("Location:index.php?msg=add_error");
             exit;
         }
-
         mysqli_stmt_close($stmt);
     }
-
     header("Location:index.php?msg=query_fail");
     exit;
 }
 
-
-
 // update
 if (isset($_POST['update'])) {
-
     $id_laundry  = intval($_POST['id_laundry']);
     $nama        = trim($_POST['namaLaundry']);
     $kecamatan   = trim($_POST['namaKecamatan']);
@@ -146,10 +114,8 @@ if (isset($_POST['update'])) {
     $alamat      = trim($_POST['alamatLaundry']);
     $profile     = trim($_POST['profile']);
     $id_layananKhusus = intval($_POST['id_layanan_khusus']);
-    $id_user     = 1; // tetap satu admin
+    $id_user     = 1;
     $fotoLama    = trim($_POST['fotoLama']);
-
-    // ambil layanan dan harga
     $layanan_id_raw    = $_POST['layanan_id'] ?? [];
     $layanan_harga_raw = $_POST['layanan_harga'] ?? [];
 
@@ -167,9 +133,7 @@ if (isset($_POST['update'])) {
     $defaultFoto = 'uploads/Geolaundry-removebg-preview.png';
     $uploadDir = __DIR__ . '/uploads/';
     if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
     $fotoPath = $fotoLama; // default pakai yang lama
-
     // upload foto baru
     if (!empty($_FILES['fotoLaundry']['name']) && $_FILES['fotoLaundry']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['fotoLaundry']['name'], PATHINFO_EXTENSION));
@@ -187,8 +151,6 @@ if (isset($_POST['update'])) {
             }
         }
     }
-
-    // update tabel laundry
     $stmt = mysqli_prepare(
         $koneksi,
         "UPDATE laundry 
@@ -197,7 +159,6 @@ if (isset($_POST['update'])) {
             id_layanan_khusus=?, id_user=?, foto=?
         WHERE id_laundry=?"
     );
-
     if ($stmt) {
         mysqli_stmt_bind_param(
             $stmt,
@@ -215,9 +176,7 @@ if (isset($_POST['update'])) {
             $fotoPath,
             $id_laundry
         );
-
         if (mysqli_stmt_execute($stmt)) {
-
             // hapus layanan lama
             $del = mysqli_prepare($koneksi, "DELETE FROM laundry_layanan WHERE id_laundry=?");
             mysqli_stmt_bind_param($del, "i", $id_laundry);
@@ -250,44 +209,30 @@ if (isset($_POST['update'])) {
     }
 }
 
-
-
-
 // delete
-
 if (isset($_GET['id'])) {
-
     $id_laundry = intval($_GET['id']);
     $defaultFoto = 'uploads/Geolaundry-removebg-preview.png';
-
     $stmt = mysqli_prepare($koneksi, "SELECT foto FROM laundry WHERE id_laundry = ?");
     mysqli_stmt_bind_param($stmt, "i", $id_laundry);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_bind_result($stmt, $fotoLama);
-
     $dataAda = mysqli_stmt_fetch($stmt);
     mysqli_stmt_close($stmt);
-
     if (!$dataAda) {
         header("Location:index.php?msg=not_found");
         exit;
     }
-
     $delRel = mysqli_prepare($koneksi, "DELETE FROM laundry_layanan WHERE id_laundry = ?");
     mysqli_stmt_bind_param($delRel, "i", $id_laundry);
     mysqli_stmt_execute($delRel);
     mysqli_stmt_close($delRel);
-
-
     $delLaundry = mysqli_prepare($koneksi, "DELETE FROM laundry WHERE id_laundry = ?");
     mysqli_stmt_bind_param($delLaundry, "i", $id_laundry);
 
     if (mysqli_stmt_execute($delLaundry)) {
-
         if (!empty($fotoLama) && $fotoLama !== $defaultFoto) {
-
             $filePath = __DIR__ . '/' . $fotoLama;
-
             if (file_exists($filePath)) {
                 unlink($filePath);
             }

@@ -5,13 +5,11 @@ require '../config.php';
 
 if (isset($_POST['simpan'])) {
     $nama_layanan = trim($_POST['nama_layanan']);
-
     $stmt = mysqli_prepare(
         $koneksi,
         "INSERT INTO layanan (nama_layanan) VALUES (?)"
     );
     mysqli_stmt_bind_param($stmt, "s", $nama_layanan);
-
     if (mysqli_stmt_execute($stmt)) {
         header("Location:index.php?msg=add_success");
     } else {
@@ -23,13 +21,11 @@ if (isset($_POST['simpan'])) {
 if (isset($_POST['update'])) {
     $id_layanan   = intval($_POST['id_layanan']);
     $nama_layanan = trim($_POST['nama_layanan']);
-
     $stmt = mysqli_prepare(
         $koneksi,
         "UPDATE layanan SET nama_layanan=? WHERE id_layanan=?"
     );
     mysqli_stmt_bind_param($stmt, "si", $nama_layanan, $id_layanan);
-
     if (mysqli_stmt_execute($stmt)) {
         header("Location:index.php?msg=update_success");
     } else {
@@ -42,7 +38,7 @@ if (isset($_GET['id'])) {
 
     $id_layanan = intval($_GET['id']);
 
-    // CEK apakah layanan digunakan oleh laundry
+    // cek layanan dipake dilaundry
     $cek = mysqli_prepare(
         $koneksi,
         "SELECT COUNT(*) FROM laundry_layanan WHERE id_layanan=?"
@@ -57,14 +53,11 @@ if (isset($_GET['id'])) {
         header("Location:index.php?msg=delete_error_fk");
         exit;
     }
-
-    // aman → hapus layanan
     $del = mysqli_prepare(
         $koneksi,
         "DELETE FROM layanan WHERE id_layanan=?"
     );
     mysqli_stmt_bind_param($del, "i", $id_layanan);
-
     if (mysqli_stmt_execute($del)) {
         header("Location:index.php?msg=delete_success");
     } else {
