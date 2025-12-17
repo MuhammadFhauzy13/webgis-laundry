@@ -67,7 +67,6 @@ require 'templates/navbar.php';
         <div class="card-body">
             <h5 class="card-title fw-semibold mb-4">Dashboard</h5>
             <p class="mb-3">Selamat datang di GeoLaundry!</p>
-
             <div class="card ">
                 <div class="card-body">
                     <div class="row">
@@ -85,7 +84,6 @@ require 'templates/navbar.php';
                                 </div>
                             </div>
                         </div>
-
                         <!-- Total layanan khusus -->
                         <div class="col-md-4 mb-3">
                             <div class="card card-blue-solid card-hover shadow">
@@ -111,7 +109,6 @@ require 'templates/navbar.php';
                                         <?php
                                         $query = "SELECT COUNT(*) AS total_layanan FROM layanan";
                                         $result = mysqli_query($koneksi, $query);
-
                                         if ($result) {
                                             $data = mysqli_fetch_assoc($result);
                                             echo $data['total_layanan'];
@@ -123,16 +120,12 @@ require 'templates/navbar.php';
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
 </div>
-
 
 <?php
 require 'templates/footer.php';
