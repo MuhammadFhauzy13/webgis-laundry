@@ -15,11 +15,10 @@ require '../templates/sidebar.php';
 require '../templates/navbar.php';
 
 ?>
-
 <div class="container-fluid">
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-4 ">Map</h5>
+            <h5 class="card-title fw-semibold mb-4 ">Peta</h5>
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body">
                     <div class="card shadow-sm border-0 rounded-3">
@@ -38,7 +37,6 @@ require '../templates/navbar.php';
 </div>
 
 <?php
-// Ambil data dari database
 $result = mysqli_query($koneksi, "SELECT laundry.*, layanan_khusus.nama_layanan_khusus 
                                                         FROM laundry 
                                                         INNER JOIN layanan_khusus
