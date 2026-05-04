@@ -7,7 +7,7 @@ if (!isset($_SESSION['ssLoginLaundry'])) {
     header("location: ../landing-page/index.php");
     exit();
 }
-require '../config.php';
+require './config.php';
 $title = 'Layanan - Geolaundry';
 
 require '../templates/header.php';

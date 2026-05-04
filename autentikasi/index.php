@@ -46,7 +46,7 @@ require '../config.php';
                                     <img src="<?= $main_url ?>src/assets/images/logos/Geolaundry-removebg-preview.png" width="110" alt="">
                                 </a>
                                 <p class="text-center mb-4">“Temukan laundry terbaik di sekitarmu”</p>
-                                    <form action="proses-login.php" method="post">
+                                <form action="proses-login.php" method="post">
                                     <div class="mb-3">
                                         <label for="username" class="form-label">Username</label>
                                         <input type="text" class="form-control" id="username" name="username" required>
@@ -55,7 +55,7 @@ require '../config.php';
                                         <label for="password" class="form-label">Password</label>
                                         <input type="password" class="form-control" id="password" name="password" required>
                                     </div>
-                                    <button type="submit" class="btn btn-sidebar w-100 py-2 rounded-2" name="login">Login</button>
+                                    <button type="submit" class="btn btn-sidebar w-100 py-2 rounded-2" name="login">masuk</button>
                                     <div class="d-flex align-items-center justify-content-center mt-3">
                                         <p class="fs-4 mb-0 fw-bold">Lihat map ?</p>
                                         <a class="text-primary fw-bold ms-2" href="<?= $main_url ?>landing-page/index.php">Kembali</a>

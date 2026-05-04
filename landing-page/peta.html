@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Peta</title>
+    <meta name="description" content="Geolaundry Ternate - Temukan laundry terbaik di sekitar Anda dengan mudah." />
+    <meta name="keywords" content="laundry, ternate, geolaundry, peta laundry, cuci baju" />
+    <!--leaflet  -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  </head>
+  <body class="index-page">
+    <!-- Header -->
+    <header id="header" class="header sticky-top"></header>
+    <main class="main">
+      <!-- Contact / Map Section -->
+      <section id="contact" class="contact section">
+        <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
+          <div class="row justify-content-center">
+            <div class="col-lg-10 col-md-12">
+              <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header text-white fw-bold" style="background-color: #02c3fe">Peta Lokasi</div>
+                <div class="card-body p-0">
+                  <!-- Container Map -->
+                  <div id="map" style="height: 400px; width: 100%; border-radius: 0 0 0.5rem 0.5rem; overflow: hidden"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      var map = L.map('map').setView([51.505, -0.09], 13);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+    </script>
+  </body>
+</html>

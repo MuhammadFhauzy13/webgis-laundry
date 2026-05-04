@@ -2,8 +2,63 @@
 
 session_start();
 
-require '../config.php';
+/** @var mysqli $koneksi */
+require_once dirname(__DIR__) . '/config.php';
 $title = 'Geolaundry';
+
+// Handle CRUD Ulasan
+if (isset($_POST['simpan_ulasan'])) {
+  $id_laundry = intval($_POST['id_laundry']);
+  $nama = trim($_POST['nama_pengguna']);
+  $rating = intval($_POST['rating']);
+  $komentar = trim($_POST['komentar']);
+
+  $stmt = mysqli_prepare($koneksi, "INSERT INTO ulasan (id_laundry, nama_pengguna, rating, komentar) VALUES (?, ?, ?, ?)");
+  mysqli_stmt_bind_param($stmt, "isis", $id_laundry, $nama, $rating, $komentar);
+  if (mysqli_stmt_execute($stmt)) {
+    $_SESSION['msg'] = 'add_success';
+  } else {
+    $_SESSION['msg'] = 'add_error';
+  }
+  mysqli_stmt_close($stmt);
+  header("Location: index.php?id_detail=" . $id_laundry . "&tab=ulasan");
+  exit;
+}
+
+if (isset($_POST['update_ulasan'])) {
+  $id_ulasan = intval($_POST['id_ulasan']);
+  $id_laundry = intval($_POST['id_laundry']);
+  $nama = trim($_POST['nama_pengguna']);
+  $rating = intval($_POST['rating']);
+  $komentar = trim($_POST['komentar']);
+
+  $stmt = mysqli_prepare($koneksi, "UPDATE ulasan SET nama_pengguna = ?, rating = ?, komentar = ? WHERE id_ulasan = ?");
+  mysqli_stmt_bind_param($stmt, "sisi", $nama, $rating, $komentar, $id_ulasan);
+  if (mysqli_stmt_execute($stmt)) {
+    $_SESSION['msg'] = 'update_success';
+  } else {
+    $_SESSION['msg'] = 'update_error';
+  }
+  mysqli_stmt_close($stmt);
+  header("Location: index.php?id_detail=" . $id_laundry . "&tab=ulasan");
+  exit;
+}
+
+if (isset($_GET['hapus_ulasan'])) {
+  $id_ulasan = intval($_GET['hapus_ulasan']);
+  $id_laundry = intval($_GET['id_laundry']);
+
+  $stmt = mysqli_prepare($koneksi, "DELETE FROM ulasan WHERE id_ulasan = ?");
+  mysqli_stmt_bind_param($stmt, "i", $id_ulasan);
+  if (mysqli_stmt_execute($stmt)) {
+    $_SESSION['msg'] = 'delete_success';
+  } else {
+    $_SESSION['msg'] = 'delete_error';
+  }
+  mysqli_stmt_close($stmt);
+  header("Location: index.php?id_detail=" . $id_laundry . "&tab=ulasan");
+  exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +92,10 @@ $title = 'Geolaundry';
 
   <!--leaflet  -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
   <!-- Leaflet Fullscreen Plugin -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" />
   <script src="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js"></script>
@@ -184,6 +242,33 @@ $title = 'Geolaundry';
     </script>';
     unset($_SESSION['flash_logout']);
   }
+
+  if (isset($_SESSION['msg'])) {
+    $msg = $_SESSION['msg'];
+    $icon = "success";
+    $title_swal = "Berhasil!";
+    $text = "";
+
+    if ($msg == 'add_success') $text = "Ulasan berhasil ditambahkan.";
+    if ($msg == 'update_success') $text = "Ulasan berhasil diperbarui.";
+    if ($msg == 'delete_success') $text = "Ulasan berhasil dihapus.";
+    if (strpos($msg, 'error') !== false) {
+      $icon = "error";
+      $title_swal = "Gagal!";
+      $text = "Terjadi kesalahan.";
+    }
+
+    echo "<script>
+        Swal.fire({
+            icon: '$icon',
+            title: '$title_swal',
+            text: '$text',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>";
+    unset($_SESSION['msg']);
+  }
   ?>
   <!-- modal detail -->
   <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
@@ -201,6 +286,9 @@ $title = 'Geolaundry';
             </li>
             <li class="nav-item">
               <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabLokasi" type="button">Lokasi & Kontak</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabUlasan" type="button">Ulasan</button>
             </li>
           </ul>
           <!-- Tabs Content -->
@@ -254,6 +342,41 @@ $title = 'Geolaundry';
                   <label class="form-label fw-semibold">No. Telepon</label>
                   <input id="m_telp" type="text" class="form-control form-control-plaintext" readonly>
                 </div>
+              </div>
+            </div>
+            <!-- ULASAN -->
+            <div class="tab-pane fade" id="tabUlasan">
+              <!-- Form at top -->
+              <form action="proses.php" method="POST" id="form-ulasan">
+                <input type="hidden" name="id_laundry" id="m_id_laundry">
+                <input type="hidden" name="id_ulasan" id="m_id_ulasan">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Nama Anda</label>
+                  <input type="text" name="nama_pengguna" id="m_nama_pengguna" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Rating</label>
+                  <select name="rating" id="m_rating" class="form-select" required>
+                    <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                    <option value="4">⭐⭐⭐⭐ (4)</option>
+                    <option value="3">⭐⭐⭐ (3)</option>
+                    <option value="2">⭐⭐ (2)</option>
+                    <option value="1">⭐ (1)</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Komentar</label>
+                  <textarea name="komentar" id="m_komentar" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="d-flex justify-content-between mb-4">
+                  <button type="submit" name="simpan_ulasan" id="btn-simpan-ulasan" class="btn btn-primary">Kirim Ulasan</button>
+                  <button type="button" id="btn-cancel-edit" class="btn btn-secondary d-none">Batal Edit</button>
+                </div>
+              </form>
+              <hr>
+              <!-- List at bottom -->
+              <div id="review-list">
+                <!-- Reviews will be loaded here via JS -->
               </div>
             </div>
           </div>
@@ -343,6 +466,7 @@ $title = 'Geolaundry';
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
     <i class="bi bi-arrow-up-short"></i>
   </a>
+
   <?php
   $result = mysqli_query($koneksi, "
     SELECT 
@@ -365,115 +489,62 @@ $title = 'Geolaundry';
     ORDER BY l.id_laundry, ly.nama_layanan
 ");
   ?>
-  <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
-  <script>
-    // pas buka peta di Ternate
-    var map = L.map('map', {
-      center: [0.80825206, 127.34063399],
-      zoom: 13,
-      fullscreenControl: true
-    });
-    map.attributionControl.setPrefix(false);
-    // Basemap OpenStreetMap
-    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(map);
-    // Basemap Satelit 
-    var satellite = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics'
-      }
-    );
-    // ganti basemap
-    var baseMaps = {
-      "OpenStreetMap": osm,
-      "Satelit": satellite
-    };
-    L.control.layers(baseMaps).addTo(map);
-    <?php
-    $laundryData = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-      $id = $row['id_laundry'];
-      if (!isset($laundryData[$id])) {
-        $laundryData[$id] = [
-          'nama_laundry' => addslashes($row['nama_laundry']),
-          'latitude' => $row['latitude'],
-          'longitude' => $row['longitude'],
-          'no_telp' => $row['no_telp'],
-          'jam_buka' => $row['jam_buka'],
-          'alamat' => addslashes($row['alamat']),
-          'profile' => addslashes($row['profile']),
-          'foto' => $row['foto'],
-          'nama_khusus' => $row['nama_layanan_khusus'],
-          'layanan' => []
-        ];
-      }
-      if ($row['nama_layanan']) {
-        $laundryData[$id]['layanan'][] = [
-          'nama' => $row['nama_layanan'],
-          'harga' => $row['harga']
+  <?php
+  $laundryData = [];
+  while ($row = mysqli_fetch_assoc($result)) {
+    $id = $row['id_laundry'];
+    if (!isset($laundryData[$id])) {
+      $laundryData[$id] = [
+        'id_laundry' => $id,
+        'nama_laundry' => addslashes($row['nama_laundry']),
+        'latitude' => $row['latitude'],
+        'longitude' => $row['longitude'],
+        'no_telp' => $row['no_telp'],
+        'jam_buka' => $row['jam_buka'],
+        'alamat' => addslashes($row['alamat']),
+        'profile' => addslashes($row['profile']),
+        'foto' => $row['foto'],
+        'nama_khusus' => $row['nama_layanan_khusus'],
+        'layanan' => [],
+        'ulasan' => []
+      ];
+
+      // Fetch ulasan
+      $ulasan_res = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE id_laundry = $id ORDER BY tanggal DESC");
+      while ($u = mysqli_fetch_assoc($ulasan_res)) {
+        $laundryData[$id]['ulasan'][] = [
+          'id_ulasan' => $u['id_ulasan'],
+          'nama_pengguna' => $u['nama_pengguna'],
+          'rating' => $u['rating'],
+          'komentar' => $u['komentar'],
+          'tanggal' => date('d M Y', strtotime($u['tanggal']))
         ];
       }
     }
-    ?>
-    // Tambah marker
-    <?php foreach ($laundryData as $l) :
-      $lat = $l['latitude'];
-      $lng = $l['longitude'];
-      $foto_url = "../laundry/" . $l['foto'];
+    if ($row['nama_layanan']) {
+      $laundryData[$id]['layanan'][] = [
+        'nama' => $row['nama_layanan'],
+        'harga' => $row['harga']
+      ];
+    }
+  }
 
-      $layananText = [];
-      foreach ($l['layanan'] as $ly) {
-        $hargaRp = number_format($ly['harga'], 0, ',', '.');
-        $layananText[] = $ly['nama'] . " - Rp " . $hargaRp;
-      }
-      $layananTextJS = implode(", ", $layananText);
-    ?>
-      var marker = L.marker([<?= $lat ?>, <?= $lng ?>]).addTo(map);
-      marker.bindPopup(`
-    <b><?= $l['nama_laundry'] ?></b><br><br>
-    No Telpon: <?= $l['no_telp'] ?><br>
-    Jam Buka: <?= $l['jam_buka'] ?><br>
-    Layanan Khusus: <?= $l['nama_khusus'] ?><br><br>
-    <img src="<?= $foto_url ?>" width="120" alt="Foto laundry"><br><br>
-    <button 
-        class="btn btn-sm btn-info openModal"
-        data-nama="<?= $l['nama_laundry'] ?>"
-        data-khusus="<?= $l['nama_khusus'] ?>"
-        data-layanan="<?= $layananTextJS ?>"
-        data-lat="<?= $lat ?>"
-        data-lng="<?= $lng ?>"
-        data-telp="<?= $l['no_telp'] ?>"
-        data-jam="<?= $l['jam_buka'] ?>"
-        data-alamat="<?= $l['alamat'] ?>"
-        data-profile="<?= $l['profile'] ?>"
-        data-foto="<?= $foto_url ?>">
-        Detail Laundry
-    </button>
-`);
-    <?php endforeach; ?>
+  // Finalize data for JS
+  foreach ($laundryData as &$l) {
+    $l['foto_url'] = "../laundry/" . $l['foto'];
+    $layananParts = [];
+    foreach ($l['layanan'] as $ly) {
+      $layananParts[] = $ly['nama'] . " - Rp " . number_format($ly['harga'], 0, ',', '.');
+    }
+    $l['layanan_text'] = implode(", ", $layananParts);
+  }
+  unset($l);
+  ?>
 
-    map.on("popupopen", function(e) {
-      const btn = e.popup._container.querySelector(".openModal");
-      if (btn) {
-        btn.addEventListener("click", function() {
-          document.getElementById("m_nama").value = this.dataset.nama;
-          document.getElementById("m_khusus").value = this.dataset.khusus;
-          document.getElementById("m_layanan").value = this.dataset.layanan;
-          document.getElementById("m_lat").value = this.dataset.lat;
-          document.getElementById("m_lng").value = this.dataset.lng;
-          document.getElementById("m_telp").value = this.dataset.telp;
-          document.getElementById("m_jam").value = this.dataset.jam;
-          document.getElementById("m_alamat").value = this.dataset.alamat;
-          document.getElementById("m_profile").value = this.dataset.profile;
-          document.getElementById("m_foto").src = this.dataset.foto;
-          let modal = new bootstrap.Modal(document.getElementById("detailModal"));
-          modal.show();
-        });
-      }
-    });
+  <script>
+    const laundryData = <?= json_encode(array_values($laundryData)) ?>;
   </script>
+  <script src="index.js"></script>
 
   <!-- Vendor JS Files -->
   <script src="<?= $main_url ?>landing-page/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
